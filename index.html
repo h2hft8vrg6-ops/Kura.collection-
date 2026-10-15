@@ -1,0 +1,1079 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>html{color-scheme:light} body{margin:0} [hidden]{display:none!important} img{max-width:100%}</style><title>Otaku Vault</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout idea: a card binder. Tab rail on the left (desktop) or tab bar at the bottom (phone); every screen is a stack of panels in one column, like pages in a binder. */
+:root{
+  --bg:#EDF0F6; --surface:#FFFFFF; --surface2:#E2E7F1; --ink:#111827; --ink2:#566078; --line:#D5DCEA;
+  --accent:#3345E8; --accent-ink:#FFFFFF;
+  --r0:#5F6E86; --r1:#2F6FDB; --r2:#0B8576; --r3:#C2238F; --r4:#B7770A; --rb-ink:#FFFFFF;
+  --good:#17804A; --bad:#C93636;
+  --font-d:'Unbounded',system-ui,sans-serif; --font-b:'Figtree',system-ui,sans-serif; --font-m:'DM Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B0F1E; --surface:#141A2F; --surface2:#1C2440; --ink:#ECEFFA; --ink2:#9AA6C6; --line:#283153;
+    --accent:#8B98FF; --accent-ink:#0B0F1E;
+    --r0:#93A1BA; --r1:#6EA8FF; --r2:#2DD4BF; --r3:#F472D0; --r4:#FBBF24; --rb-ink:#0B0F1E;
+    --good:#3DD68C; --bad:#FF7A7A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B0F1E; --surface:#141A2F; --surface2:#1C2440; --ink:#ECEFFA; --ink2:#9AA6C6; --line:#283153;
+  --accent:#8B98FF; --accent-ink:#0B0F1E;
+  --r0:#93A1BA; --r1:#6EA8FF; --r2:#2DD4BF; --r3:#F472D0; --r4:#FBBF24; --rb-ink:#0B0F1E;
+  --good:#3DD68C; --bad:#FF7A7A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1{font:700 clamp(20px,4.6vw,26px)/1.2 var(--font-d);letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance}
+h2{font:500 14px/1.3 var(--font-d);letter-spacing:.01em;margin:0 0 12px;text-wrap:balance}
+p{margin:0 0 10px}
+.mut{color:var(--ink2)}
+.sm{font-size:12.5px}
+.kicker{display:block;font:500 11.5px var(--font-m);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
+
+/* shell */
+.shell{max-width:1180px;margin:0 auto;padding-block:16px}
+.content{min-width:0;padding-bottom:96px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:18px}
+.hr{display:flex;align-items:center;gap:8px}
+.brand{display:inline-flex;align-items:center;gap:9px;font:700 14px var(--font-d);letter-spacing:.06em}
+.coins{display:inline-flex;align-items:center;gap:7px;font:500 14px var(--font-m);padding:6px 12px;border:1px solid var(--line);border-radius:99px;background:var(--surface)}
+.coins .sm{color:var(--ink2)}
+.ib{width:36px;height:36px;display:inline-grid;place-items:center;border:1px solid var(--line);background:var(--surface);border-radius:50%;cursor:pointer;color:var(--ink)}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-around;
+  padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:var(--surface);border-top:1px solid var(--line)}
+.nav .brand{display:none}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border:0;background:none;color:var(--ink2);font:600 11px var(--font-b);cursor:pointer;border-radius:10px}
+.nav button[aria-current="page"]{color:var(--accent)}
+@media (min-width:900px){
+  .shell{display:grid;grid-template-columns:200px minmax(0,1fr);gap:36px;padding-block:24px}
+  .nav{position:sticky;top:24px;align-self:start;flex-direction:column;justify-content:flex-start;gap:4px;padding:0;background:none;border:0}
+  .nav .brand{display:inline-flex;margin-bottom:22px}
+  .head .brand{display:none}
+  .head{justify-content:flex-end}
+  .nav button{flex:none;flex-direction:row;gap:12px;padding:11px 14px;font-size:14.5px;text-align:left;justify-content:flex-start;border-radius:12px}
+  .nav button[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+  .content{padding-bottom:40px}
+}
+
+/* generic parts */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.stack{display:flex;flex-direction:column;gap:16px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.btn{font:600 14px var(--font-b);padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 13px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font:500 13px var(--font-b);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;font:500 12px var(--font-m);background:var(--surface2);color:var(--ink2)}
+.pill.ok{color:var(--good)}
+.empty{padding:28px 8px;text-align:center;color:var(--ink2)}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.acts.c{justify-content:center}
+.bar{display:block;width:100%;border:0;background:none;padding:0;text-align:left;cursor:pointer;margin-bottom:12px}
+.bar .bl{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-bottom:5px}
+.bar .bl span{font-family:var(--font-m);color:var(--ink2)}
+.bt{display:block;height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.bt i{display:block;height:100%;border-radius:99px}
+.hrow{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+.hrow>*{flex:0 0 124px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:14px}
+.ring{width:132px;height:132px;flex:none}
+.ring .rn{font:700 28px var(--font-d);fill:var(--ink)}
+.ring .rs{font:500 12px var(--font-m);fill:var(--ink2)}
+.prog{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.prog>div:last-child{flex:1;min-width:180px}
+.event{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-radius:14px;padding:16px 18px;color:#fff;border:1px solid transparent}
+.event p{margin:0}
+.event .kicker{color:rgba(255,255,255,.78)}
+.event b{font-family:var(--font-d);font-weight:700;font-size:15px}
+.event .btn{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.35)}
+.note{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+
+/* cards */
+.cw{container-type:inline-size;width:100%}
+.slot{display:block;width:100%;padding:0;border:0;background:none;text-align:left;cursor:pointer;border-radius:12px}
+.card{position:relative;aspect-ratio:5/7;border-radius:5cqw;overflow:hidden;display:flex;flex-direction:column;background:var(--surface);
+  border:max(1.5px,.9cqw) solid var(--rc);box-shadow:0 8px 18px -12px rgba(8,12,30,.6);transition:transform .2s}
+.slot:hover .card{transform:translateY(-3px)}
+.r0{--rc:var(--r0)} .r1{--rc:var(--r1)} .r2{--rc:var(--r2)} .r3{--rc:var(--r3)} .r4{--rc:var(--r4)}
+.r4{box-shadow:0 0 0 1px var(--r4),0 8px 22px -8px var(--r4)}
+.r5{border-color:transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,conic-gradient(from 210deg,#f472d0,#fbbf24,#2dd4bf,#7c8bff,#f472d0) border-box}
+.art{position:relative;flex:1;min-height:0;background:#0a0d1a;overflow:hidden}
+.art svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cap{flex:none;padding:3.2cqw 4.5cqw 4cqw;background:var(--surface)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:2cqw;margin-bottom:1.6cqw}
+.num{font:400 max(9px,5.6cqw) var(--font-m);color:var(--ink2)}
+.rb{font:500 max(9px,5.4cqw) var(--font-m);padding:.5cqw 2.6cqw;border-radius:99px;background:var(--rc);color:var(--rb-ink)}
+.r5 .rb{background:linear-gradient(90deg,#d6249f,#e08a00,#0b8576);color:#fff}
+.nm{font-weight:700;font-size:max(10px,7.2cqw);line-height:1.18;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sub{display:none;font-size:5.4cqw;color:var(--ink2);margin-top:1.4cqw}
+.big .sub{display:block}
+.locked .nm{color:var(--ink2)}
+.cnt{position:absolute;top:2.5cqw;right:2.5cqw;background:rgba(10,13,26,.85);color:#fff;font:500 max(10px,6cqw) var(--font-m);padding:.6cqw 2.8cqw;border-radius:99px}
+.ht{position:absolute;left:2.5cqw;bottom:2.5cqw;background:rgba(10,13,26,.85);color:#fff;font:500 max(8px,4.6cqw) var(--font-m);letter-spacing:.1em;padding:.6cqw 2.6cqw;border-radius:99px;z-index:2}
+.tg{position:absolute;top:2.5cqw;left:2.5cqw;z-index:3;background:var(--accent);color:var(--accent-ink);font:600 max(9px,5cqw) var(--font-b);padding:.8cqw 3cqw;border-radius:99px}
+.foil .art::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.4) 44%,rgba(120,255,240,.3) 50%,rgba(255,150,230,.3) 56%,transparent 70%);background-size:260% 260%;mix-blend-mode:screen;animation:sheen 3.8s ease-in-out infinite}
+@keyframes sheen{0%{background-position:120% 0}100%{background-position:-60% 0}}
+.dupe{display:flex;flex-direction:column;gap:8px}
+
+/* album */
+.pgs{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px}
+.pg{flex:0 0 auto;min-width:118px;display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+.pg b{font-size:13.5px}
+.pg span{font:400 12px var(--font-m);color:var(--ink2)}
+.pg.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.pghead{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.filters input[type=search],.filters select,.field{font:500 14px var(--font-b);padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);min-width:0}
+.filters input[type=search]{flex:1 1 200px}
+.filters label{display:inline-flex;align-items:center;gap:7px;font-size:14px}
+
+/* packs */
+.pk{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.pkart{flex:0 0 110px}
+.packsvg{width:110px;height:auto;display:block;filter:drop-shadow(0 10px 14px rgba(8,12,30,.35))}
+.pkbody{flex:1;min-width:200px}
+.odds{font:400 12.5px/1.5 var(--font-m);color:var(--ink2)}
+
+/* trade */
+.offer{display:flex;flex-direction:column;gap:14px}
+.who{display:flex;gap:12px;align-items:flex-start}
+.av{width:38px;height:38px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font:700 14px var(--font-d);flex:none}
+.who b{margin-right:8px}
+.who span{font:400 12px var(--font-m);color:var(--ink2)}
+.who p{margin:2px 0 0;font-size:13.5px;color:var(--ink2)}
+.swap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.swap .col{width:108px}
+.swap .col.multi{width:auto;display:flex;gap:10px}
+.swap .col.multi>div{width:108px}
+.arrow{color:var(--ink2)}
+
+/* profile */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.stat{padding:12px 14px;border-radius:12px;background:var(--surface2)}
+.stat b{display:block;font:700 20px var(--font-d)}
+.stat span{font-size:12.5px;color:var(--ink2)}
+.ach{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.ach:first-of-type{border-top:0}
+.ach .dot{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--surface2);color:var(--ink2)}
+.ach.on .dot{background:var(--good);color:#fff}
+.ach div{min-width:0}
+.ach b{display:block;font-size:14px}
+.ach span{font-size:12.5px;color:var(--ink2)}
+.ach.lock{opacity:.7}
+textarea.field{width:100%;min-height:88px;font-family:var(--font-m);font-size:12px;resize:vertical}
+input.field{width:100%}
+
+/* overlays */
+.ov{position:fixed;inset:0;z-index:50;background:rgba(6,9,20,.72);display:flex;align-items:center;justify-content:center;overflow:auto;
+  padding-top:max(16px,env(safe-area-inset-top,0px));padding-bottom:max(16px,env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheet{position:relative;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:18px;max-width:760px;width:100%;max-height:100%;overflow:auto;padding:22px;display:grid;grid-template-columns:minmax(0,250px) minmax(0,1fr);gap:26px;align-items:start}
+@media (max-width:640px){.sheet{grid-template-columns:minmax(0,1fr)}.sheet>div:first-child{max-width:230px;margin:0 auto;width:100%}}
+.close{position:absolute;top:12px;right:12px;font-size:20px;line-height:1}
+.info{display:flex;flex-direction:column;gap:12px;min-width:0;padding-right:30px}
+.ttl{font:700 20px/1.25 var(--font-d);margin:0}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font:500 12px var(--font-m);padding:4px 10px;border-radius:99px;background:var(--surface2);color:var(--ink)}
+.tag.r0{background:var(--r0);color:var(--rb-ink)}.tag.r1{background:var(--r1);color:var(--rb-ink)}.tag.r2{background:var(--r2);color:var(--rb-ink)}.tag.r3{background:var(--r3);color:var(--rb-ink)}.tag.r4{background:var(--r4);color:var(--rb-ink)}.tag.r5{background:linear-gradient(90deg,#d6249f,#e08a00,#0b8576);color:#fff}
+.tag.el::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ec);margin-right:6px}
+.flav{font-size:15px;margin:0;font-style:italic}
+.revbox{width:100%;max-width:880px;text-align:center;color:#fff;display:flex;flex-direction:column;align-items:center;gap:18px}
+.revhint{margin:0;color:#dfe5ff;font-size:14px}
+.packstage{width:min(220px,56vw)}
+.packstage .packsvg{width:100%}
+.packstage.shake{animation:shake .65s ease-in-out}
+@keyframes shake{0%,100%{transform:rotate(0)}15%{transform:rotate(-6deg) scale(1.04)}35%{transform:rotate(6deg) scale(1.06)}55%{transform:rotate(-5deg) scale(1.08)}75%{transform:rotate(4deg) scale(1.1)}}
+.rcards{display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
+.rc{position:relative;width:clamp(96px,27vw,156px);perspective:900px;cursor:pointer;--glow:transparent}
+.rc.g3{--glow:#f472d0}.rc.g4{--glow:#fbbf24}.rc.g5{--glow:#5ef0ff}
+.rc::before{content:"";position:absolute;inset:6%;border-radius:14%;opacity:0;box-shadow:0 0 34px 12px var(--glow);transition:opacity .4s .35s}
+.rc.on::before{opacity:.9}
+.flip{position:relative;aspect-ratio:5/7;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,1.25,.5,1)}
+.rc.on .flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face.fr{transform:rotateY(180deg);text-align:left}
+.face .cw,.face .card{height:100%}
+.face .card{aspect-ratio:auto}
+.face.back{border-radius:6%/4.3%;border:2px solid rgba(154,166,255,.45);background:repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0 6px,transparent 6px 12px),linear-gradient(160deg,#1c2350,#0d1230);display:grid;place-items:center}
+.ov.jolt{animation:jolt .5s}
+@keyframes jolt{0%,100%{transform:translate(0)}20%{transform:translate(-7px,4px)}40%{transform:translate(6px,-5px)}60%{transform:translate(-5px,-3px)}80%{transform:translate(4px,5px)}}
+.sndbtn{position:fixed;top:max(14px,env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));z-index:5;background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)}
+.packwrap{position:relative;width:min(220px,56vw);cursor:pointer;--ac:rgba(154,166,255,.45)}
+.packwrap::before{content:"";position:absolute;inset:-38%;border-radius:50%;background:radial-gradient(circle,var(--ac),transparent 62%);animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.55;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
+.rays{position:absolute;inset:-90%;opacity:0;transition:opacity .35s;background:repeating-conic-gradient(rgba(255,255,255,.34) 0 5deg,transparent 5deg 15deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 60%);mask-image:radial-gradient(circle,#000 0,transparent 60%);animation:spin 7s linear infinite}
+.packwrap.open .rays{opacity:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pk2{position:relative;width:100%;aspect-ratio:120/170}
+.half{position:absolute;inset:0}
+.half .packsvg{width:100%;height:100%}
+.half.top{clip-path:inset(0 0 74% 0)}
+.half.bot{clip-path:inset(26% 0 0 0)}
+.pk2.shake{animation:shake .65s ease-in-out}
+.pk2.go .top{animation:tearTop .7s ease-in forwards}
+.pk2.go .bot{animation:tearBot .8s .15s ease-in forwards}
+@keyframes tearTop{to{transform:translate(70%,-130%) rotate(32deg);opacity:0}}
+@keyframes tearBot{to{transform:translateY(30%) scale(.92);opacity:0}}
+.rc{animation:deal .6s cubic-bezier(.2,1.2,.4,1) both;animation-delay:calc(var(--i)*90ms)}
+@keyframes deal{from{opacity:0;transform:translateY(70px) scale(.35) rotate(-10deg)}to{opacity:1;transform:none}}
+.rc.slow .flip{transition-duration:1.3s}
+.rc.g3 .face.back{border-color:#f472d0;box-shadow:0 0 14px #f472d088}
+.rc.g4 .face.back{border-color:#fbbf24;box-shadow:0 0 16px #fbbf2499}
+.rc.g5 .face.back{border-color:#5ef0ff;box-shadow:0 0 18px #5ef0ffaa}
+.sp{position:fixed;z-index:80;width:7px;height:7px;margin:-3px 0 0 -3px;border-radius:50%;background:var(--c);box-shadow:0 0 9px var(--c);pointer-events:none;animation:spark .95s ease-out both}
+@keyframes spark{from{transform:translate(0,0) scale(1);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.banner{position:fixed;left:0;right:0;top:16%;z-index:75;text-align:center;pointer-events:none;font:700 clamp(26px,8vw,54px) var(--font-d);letter-spacing:.08em;color:var(--c);text-shadow:0 0 24px var(--c),0 2px 0 rgba(0,0,0,.5);animation:ban 1.7s ease-out forwards}
+@keyframes ban{0%{opacity:0;transform:scale(.6)}15%{opacity:1;transform:scale(1.1)}30%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.flashfx{position:fixed;inset:0;z-index:70;pointer-events:none;background:radial-gradient(circle,var(--fc),transparent 72%);opacity:0;animation:flash .8s ease-out}
+@keyframes flash{0%{opacity:0}16%{opacity:.95}100%{opacity:0}}
+.toasts{position:fixed;left:0;right:0;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding-left:16px;padding-right:16px}
+.toast{background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 10px 24px -10px rgba(0,0,0,.5);animation:rise .25s ease-out}
+@keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+@media (min-width:900px){.toasts{bottom:28px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.rays,.packwrap::before{pointer-events:none}
+.ov{background:rgba(6,9,20,.97)!important}
+.pic{width:100%;height:100%;object-fit:cover;display:block}
+.coins.pts{margin-right:6px}
+.recap{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px 12px;width:100%;max-width:760px;text-align:left}
+.recap .rp{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.06);opacity:.32;transition:opacity .3s;font-size:13px}
+.recap .rp.on{opacity:1}
+.recap .rn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recap em{font-style:normal;color:#ffd166;font-size:11px}.recap small{opacity:.7;font-size:11px}
+</style>
+
+</head><body><div class="shell">
+  <nav class="nav" id="nav" aria-label="Navigation principale"></nav>
+  <div class="content">
+    <header class="head" id="head"></header>
+    <main id="main"></main>
+  </div>
+</div>
+<div id="ov"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const pad=(n,l=3)=>String(n).padStart(l,'0');
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- Données : quatre collections ---------- */
+const SERIES=[
+  {id:'yk',name:'Yōkai & Oni',tag:'Démons du Japon',h:275,txt:'Esprits, démons et créatures du folklore japonais.'},
+  {id:'ol',name:"Dieux de l'Olympe",tag:'Mythologie grecque',h:215,txt:'Dieux, monstres et héros de la Grèce antique.'},
+  {id:'vg',name:'Légendes du jeu vidéo',tag:'Jeux vidéo',h:155,txt:"Les jeux et les consoles qui ont marqué l'histoire du jeu vidéo."},
+  {id:'mg',name:'Mangas & Animés',tag:'Œuvres cultes',h:345,txt:'Les mangas et les animés qui ont fait le tour du monde.'}
+];
+const SER={};SERIES.forEach(s=>SER[s.id]=s);
+/* Teinte de décor par univers (les cartes Manga & Anime viennent de quatre univers différents) */
+const UH={yk:275,ol:215,vg:155,mg:345};
+const RAR=[
+  {code:'C',name:'Commune',w:51,val:8,xp:1},
+  {code:'R',name:'Rare',w:27,val:20,xp:2},
+  {code:'SR',name:'Super Rare',w:13,val:50,xp:4},
+  {code:'UR',name:'Ultra Rare',w:6,val:120,xp:8},
+  {code:'L',name:'Légendaire',w:1.8,val:350,xp:20},
+  {code:'ALT',name:'Alternatif',w:1.2,val:500,xp:25}
+];
+const RARI={C:0,R:1,SR:2,UR:3,L:4,ALT:5};
+const EL={'Feu':'#ff6b3d','Eau':'#3b9cff','Terre':'#c08a4a','Vent':'#7ee0a0','Foudre':'#fff44d','Lumière':'#ffb62e','Ombre':'#8b6cff','Acier':'#a9b7c9'};
+const ELEMS=['Feu','Eau','Terre','Vent','Foudre','Lumière','Ombre','Acier'];
+const TYPES=[['Personnage','Personnages'],['Pouvoir','Pouvoirs'],['Lieu','Lieux'],['Objet','Objets'],['Citation','Citations'],['Éveil','Éveils'],['Jeu','Jeux'],['Console','Consoles'],['Manga','Mangas'],['Anime','Animés']];
+/* Format : [nom, catégorie, élément, rareté, description, genre, carte de base (Alternatif)] */
+const RAW={
+yk:[
+["Kappa de la rivière","Personnage","Eau","C","Petit esprit aquatique au crâne creux rempli d'eau. Il adore les concombres et reste poli jusqu'à la faiblesse : si on le salue, il s'incline et vide sa cuvette."],
+["Tanuki farceur","Personnage","Terre","C","Un chien viverrin capable de se transformer en théière ou en moine. Ses feuilles font office de monnaie, jusqu'au lever du jour."],
+["Karakasa-obake","Personnage","Vent","C","Un vieux parapluie devenu esprit : un œil, une langue et une seule jambe. Il saute de joie sous la pluie."],
+["Chōchin-obake","Personnage","Feu","C","Une lanterne de papier hantée qui ouvre grand la bouche pour effrayer les promeneurs de nuit."],
+["Torii du crépuscule","Lieu","Lumière","C","Le portail rouge qui sépare le monde des humains de celui des esprits. À la tombée du jour, on dit qu'il ne mène plus au même endroit."],
+["« Ne siffle pas la nuit. »","Citation","Ombre","C","Un conseil de grand-mère : siffler dans le noir attirerait les créatures de l'ombre. Les histoires varient selon les régions."],
+["Tengu des montagnes","Personnage","Vent","R","Esprit-corbeau et maître d'armes. Il enseigne l'escrime aux guerriers dignes et égare les orgueilleux."],
+["Nure-onna","Personnage","Eau","R","Une femme-serpent qui surgit des rives. Elle confie un bébé aux voyageurs, qui devient lourd comme une pierre."],
+["Jorōgumo","Personnage","Ombre","R","Une araignée qui prend l'apparence d'une belle musicienne. Elle attire ses proies près d'une cascade, puis tisse sa toile."],
+["Danse des lanternes","Pouvoir","Feu","R","Des flammes pâles dansent dans les rizières. Les anciens les appellent les feux du renard."],
+["Forêt des mille torii","Lieu","Terre","R","Un sentier de portiques rouges dans la brume. Chaque torii est un vœu offert à un esprit bienveillant."],
+["Kitsune à neuf queues","Personnage","Feu","SR","Un renard centenaire dont chaque queue marque un siècle de sagesse. Il prend forme humaine pour tromper les plus rusés."],
+["Yuki-onna","Personnage","Vent","SR","La dame des neiges. Elle apparaît dans les tempêtes, belle et glacée, et épargne parfois ceux qui promettent de se taire."],
+["Masque d'Hannya","Objet","Ombre","SR","Le masque du théâtre nō qui montre la jalousie devenue démon. Son expression change selon l'angle de la lumière."],
+["Épée du serpent à huit têtes","Objet","Acier","SR","Selon la légende, le dieu Susanoo l'a trouvée dans la queue d'un serpent géant. Elle devint l'un des trois trésors sacrés du Japon."],
+["Shuten-dōji, roi des oni","Personnage","Feu","UR","Le chef des oni du mont Ōe, grand buveur de saké. Le héros Minamoto no Raikō a fini par le vaincre en l'enivrant."],
+["Gashadokuro","Personnage","Ombre","UR","Un squelette géant formé des os de ceux qui sont morts de faim. Il erre la nuit et on ne l'entend jamais venir."],
+["Yamata no Orochi","Personnage","Eau","L","Un serpent colossal à huit têtes et huit queues dont le corps recouvrait huit vallées. Susanoo l'a enivré de saké pour le vaincre."],
+["Shuten-dōji, Festin de cendres","Éveil","Feu","ALT","Version alternative : le roi des oni lève sa gourde au milieu d'un banquet en flammes, sans voir venir le piège.","","Shuten-dōji, roi des oni"],
+["Orochi, Nuit des huit lunes","Éveil","Eau","ALT","Version alternative : sous huit lunes pâles, les huit têtes du serpent se reflètent dans huit rivières.","","Yamata no Orochi"]
+],
+ol:[
+["Pégase","Personnage","Vent","C","Le cheval ailé né du sang de Méduse. Bellérophon l'a monté pour affronter la Chimère."],
+["Satyre joueur de flûte","Personnage","Terre","C","Compagnon de Dionysos, mi-homme mi-bouc. Sa flûte rend les festins interminables."],
+["Nymphe des sources","Personnage","Eau","C","Un esprit gracieux qui garde une source ou un bois. Qui la respecte ne manque jamais d'eau fraîche."],
+["Couronne de laurier","Objet","Lumière","C","Le laurier est l'arbre d'Apollon. On en couronnait les poètes et les vainqueurs des jeux de Delphes."],
+["Temple de Delphes","Lieu","Lumière","C","Le sanctuaire d'Apollon où la Pythie rendait ses oracles, au pied du mont Parnasse."],
+["« Connais-toi toi-même. »","Citation","Lumière","C","L'une des maximes gravées à l'entrée du sanctuaire de Delphes."],
+["Hermès, messager des dieux","Personnage","Vent","R","Dieu rapide aux sandales ailées, protecteur des voyageurs, des marchands et des voleurs."],
+["Artémis, la chasseresse","Personnage","Lumière","R","Déesse de la chasse et de la lune, elle parcourt les forêts avec son arc d'argent."],
+["Cerbère","Personnage","Ombre","R","Le chien à trois têtes qui garde l'entrée des Enfers. Il laisse entrer tout le monde, mais ne laisse sortir personne."],
+["Lyre d'Orphée","Objet","Lumière","R","Sa musique charmait les bêtes, les arbres et même les dieux des Enfers."],
+["Mont Olympe","Lieu","Terre","R","La plus haute montagne de Grèce, demeure des douze dieux, cachée par les nuages."],
+["Athéna, déesse de la sagesse","Personnage","Acier","SR","Née tout armée de la tête de Zeus, elle protège Athènes et inspire les stratèges avisés."],
+["Poséidon, maître des mers","Personnage","Eau","SR","Son trident fait trembler la terre et soulève les vagues. Les marins lui font des offrandes avant chaque départ."],
+["Méduse","Personnage","Ombre","SR","Une des trois Gorgones. Son regard changeait en pierre. Persée l'a vaincue grâce à un bouclier poli comme un miroir."],
+["Trident de Poséidon","Objet","Eau","SR","L'arme qui fait jaillir des sources, déclenche les tempêtes et ébranle les falaises."],
+["Apollon, dieu de la lumière","Personnage","Lumière","UR","Dieu de la musique, de la prophétie et des arts. Les poètes l'associent au soleil."],
+["Hadès, roi des Enfers","Personnage","Ombre","UR","Maître du monde souterrain, il possède un casque qui rend invisible. Les Grecs évitaient presque de prononcer son nom."],
+["Zeus, roi de l'Olympe","Personnage","Foudre","L","Maître du ciel et de la foudre. Il règne sur les dieux depuis qu'il a renversé son père Cronos."],
+["Zeus, Tempête sur l'Olympe","Éveil","Foudre","ALT","Version alternative : le roi des dieux déchaîne l'orage au-dessus des Titans vaincus.","","Zeus, roi de l'Olympe"],
+["Hadès, Casque des ténèbres","Éveil","Ombre","ALT","Version alternative : invisible, il traverse le monde des vivants sans que personne ne le voie.","","Hadès, roi des Enfers"]
+],
+vg:[
+["Pong","Jeu","Foudre","C","Atari, 1972. Deux barres, une balle et des règles qui tiennent en une phrase : l'un des premiers grands succès des salles d'arcade.","Sport, arcade"],
+["Space Invaders","Jeu","Foudre","C","Taito, 1978. Des rangées d'envahisseurs descendent de plus en plus vite. Il a fait entrer le jeu d'arcade dans la culture populaire.","Tir spatial"],
+["Pac-Man","Jeu","Lumière","C","Namco, 1980. Dévorer des pastilles dans un labyrinthe en évitant quatre fantômes. Son créateur, Tōru Iwatani, voulait séduire un public plus large que les habitués des salles.","Labyrinthe, arcade"],
+["Tetris","Jeu","Eau","C","Conçu en 1984 par l'ingénieur soviétique Alexeï Pajitnov. Faire tomber des pièces et compléter des lignes. Sa version sur Game Boy, en 1989, l'a rendu célèbre dans le monde entier.","Puzzle"],
+["Atari 2600","Console","Acier","C","Atari, 1977. L'une des premières consoles à cartouches interchangeables à connaître un grand succès, avec sa manette à un seul bouton.","Console de salon"],
+["Game Boy","Console","Acier","C","Nintendo, 1989. Un écran monochrome verdâtre, des piles et des heures de jeu partout : la console portable qui a popularisé le jeu en mobilité.","Console portable"],
+["Donkey Kong","Jeu","Terre","R","Nintendo, 1981. Escalader des poutrelles en évitant des tonneaux. Il a lancé la carrière de son créateur, Shigeru Miyamoto.","Plateforme"],
+["Sonic the Hedgehog","Jeu","Vent","R","Sega, 1991. Un jeu de plateforme tout en vitesse, pensé pour donner à la console Mega Drive une mascotte capable de rivaliser avec Nintendo.","Plateforme, vitesse"],
+["Street Fighter II","Jeu","Feu","R","Capcom, 1991. Le jeu de combat qui a rempli les salles d'arcade et installé l'habitude de s'affronter face à face autour d'une borne.","Combat"],
+["Doom","Jeu","Feu","R","id Software, 1993. Un tir à la première personne rapide et sombre, distribué en partie gratuitement, qui a rendu le genre très populaire sur PC.","Tir subjectif"],
+["Super Nintendo","Console","Acier","R","Nintendo, 1990 au Japon (Super Famicom). Sa palette de couleurs et ses manettes à quatre boutons ont marqué toute une génération de jeux.","Console de salon"],
+["Final Fantasy","Jeu","Lumière","SR","Square, 1987. Le jeu de rôle que son créateur, Hironobu Sakaguchi, pensait être son dernier. Il est devenu le point de départ d'une très longue série.","Jeu de rôle"],
+["Resident Evil","Jeu","Ombre","SR","Capcom, 1996. Un manoir, des munitions comptées et une tension permanente : il a popularisé le survival horror auprès du grand public.","Survival horror"],
+["Minecraft","Jeu","Terre","SR","Mojang, première version en 2009, sortie complète en 2011. Un monde de cubes à explorer, à miner et à construire, devenu l'un des jeux les plus vendus de l'histoire.","Bac à sable"],
+["Dark Souls","Jeu","Ombre","SR","FromSoftware, 2011, sous la direction de Hidetaka Miyazaki. Réputé pour sa difficulté et son monde en ruines, il a inspiré tout un genre de jeux exigeants.","Action-RPG"],
+["Super Mario Bros.","Jeu","Vent","UR","Nintendo, 1985. Courir, sauter et traverser huit mondes. Le jeu qui a relancé le marché des consoles après la crise de 1983.","Plateforme"],
+["Pokémon Rouge et Bleu","Jeu","Terre","UR","Game Freak, 1996 au Japon (versions Rouge et Vert), 1999 en Europe. Capturer, entraîner et échanger des créatures : l'échange entre joueurs faisait partie du jeu dès le début.","Jeu de rôle, collection"],
+["The Legend of Zelda : Ocarina of Time","Jeu","Lumière","L","Nintendo, 1998, sur Nintendo 64. Premier épisode en 3D de la série, devenu une référence de l'aventure, notamment pour son système de ciblage.","Aventure"],
+["Ocarina of Time 3D","Éveil","Lumière","ALT","Version alternative : le remake de 2011 sur Nintendo 3DS, avec des graphismes refaits et un effet de relief.","Aventure","The Legend of Zelda : Ocarina of Time"],
+["Pokémon Rouge Feu et Vert Feuille","Éveil","Feu","ALT","Version alternative : les remakes de 2004 sur Game Boy Advance, qui reprennent l'aventure d'origine avec des graphismes modernisés.","Jeu de rôle, collection","Pokémon Rouge et Bleu"]
+],
+mg:[
+["Astro Boy","Manga","Acier","C","Osamu Tezuka, 1952. Un garçon-robot au grand cœur dans un futur lointain. Son adaptation télévisée de 1963 est souvent considérée comme la première grande série animée japonaise.","Science-fiction"],
+["Doraemon","Manga","Vent","C","Fujiko F. Fujio, 1969. Un chat-robot venu du futur sort des gadgets de sa poche pour aider un écolier distrait. Un classique de l'enfance au Japon.","Comédie, science-fiction"],
+["Saint Seiya (Les Chevaliers du Zodiaque)","Manga","Lumière","C","Masami Kurumada, 1986. Des guerriers protégés par des armures inspirées des constellations défendent une déesse. L'anime est connu en France sous le titre Les Chevaliers du Zodiaque.","Shōnen, mythologie"],
+["Slam Dunk","Manga","Feu","C","Takehiko Inoue, 1990–1996. Un lycéen novice rejoint une équipe de basket. Un manga de sport devenu incontournable.","Sport, basket"],
+["Sailor Moon","Manga","Lumière","C","Naoko Takeuchi, 1991. Des lycéennes aux pouvoirs magiques défendent la Terre. Elle a marqué durablement le genre de la guerrière magique.","Shōjo, magie"],
+["Mon voisin Totoro","Anime","Terre","C","Studio Ghibli, Hayao Miyazaki, 1988. Deux sœurs découvrent les esprits de la forêt près de leur nouvelle maison à la campagne. Une œuvre tendre sur l'enfance et la nature.","Film d'animation"],
+["Akira","Manga","Acier","R","Katsuhiro Ōtomo, 1982. Dans un Tokyo reconstruit après une catastrophe, une bande de motards croise un projet militaire secret. Le film de 1988 a fait découvrir l'animation japonaise à beaucoup d'Occidentaux.","Science-fiction"],
+["Ghost in the Shell","Anime","Acier","R","Mamoru Oshii, 1995, d'après le manga de Masamune Shirow publié en 1989. Une enquêtrice cyborg face aux questions d'identité à l'ère des réseaux.","Science-fiction, film"],
+["Cowboy Bebop","Anime","Vent","R","Sunrise, 1998, réalisé par Shinichirō Watanabe. Des chasseurs de primes dans l'espace, portés par une bande originale de jazz signée Yoko Kanno.","Space opera"],
+["Fullmetal Alchemist","Manga","Feu","R","Hiromu Arakawa, 2001–2010. Deux frères cherchent à réparer une erreur d'alchimie. Une série appréciée pour la cohérence de son système de magie.","Fantasy, aventure"],
+["Death Note","Manga","Ombre","R","Tsugumi Ohba et Takeshi Obata, 2003–2006. Un duel d'intelligence autour d'un carnet qui peut tuer. Douze volumes sous tension.","Thriller psychologique"],
+["Neon Genesis Evangelion","Anime","Acier","SR","Gainax, réalisé par Hideaki Anno, 1995–1996. Des adolescents pilotent des armes géantes contre des envahisseurs, dans un récit très tourné vers l'intériorité.","Mecha, psychologique"],
+["Le Voyage de Chihiro","Anime","Lumière","SR","Studio Ghibli, Hayao Miyazaki, 2001. Une fillette travaille dans une maison de bains pour esprits afin de sauver ses parents. Il a reçu l'Oscar du meilleur film d'animation en 2003.","Fantasy, film"],
+["Demon Slayer (Kimetsu no Yaiba)","Manga","Eau","SR","Koyoharu Gotōge, 2016–2020. Un jeune homme affronte des démons pour sauver sa sœur. Le film de 2020 est devenu le plus gros succès de l'histoire du cinéma japonais à sa sortie.","Shōnen, action"],
+["L'Attaque des Titans","Manga","Ombre","SR","Hajime Isayama, 2009–2021. L'humanité vit derrière des murs, menacée par des géants. Le récit a été salué pour ses retournements de situation.","Dark fantasy"],
+["One Piece","Manga","Eau","UR","Eiichirō Oda, depuis 1997. Une quête de trésor à travers les mers, pleine d'amitiés et d'îles étranges. L'une des séries de manga les plus vendues de tous les temps.","Shōnen, aventure"],
+["Naruto","Manga","Vent","UR","Masashi Kishimoto, 1999–2014. Un apprenti ninja rêve de se faire reconnaître par son village. La série a fait connaître le manga à un très large public international.","Shōnen, ninja"],
+["Dragon Ball","Manga","Foudre","L","Akira Toriyama, 1984–1995. Une quête de sept boules magiques mêlant arts martiaux, humour et aventure. L'une des œuvres les plus influentes du manga de combat.","Shōnen, arts martiaux"],
+["Dragon Ball Z (anime)","Éveil","Foudre","ALT","Version alternative : l'adaptation animée de la suite, diffusée au Japon à partir de 1989 et célèbre pour ses combats spectaculaires.","Shōnen, animé","Dragon Ball"],
+["One Piece (anime)","Éveil","Eau","ALT","Version alternative : l'adaptation animée du studio Toei Animation, diffusée depuis 1999.","Shōnen, animé","One Piece"]
+]};
+/* Nouvelles cartes : format [nom, catégorie, élément, rareté, description, genre, carte de base (Alternatif), exclusif boutique] */
+const MORE={
+yk:[
+["Nopperabō","Personnage","Ombre","C","Le yōkai sans visage. Il apparaît sous les traits d'un passant ordinaire, puis passe la main sur son visage et le laisse lisse comme un œuf. Son histoire la plus connue en Occident a été racontée par l'écrivain Lafcadio Hearn."],
+["Zashiki-warashi","Personnage","Lumière","C","Un esprit-enfant qui vit dans certaines maisons du nord du Japon. On dit qu'il apporte la prospérité à la famille qui l'héberge, et qu'elle la perd s'il s'en va."],
+["Rokurokubi","Personnage","Ombre","C","Le jour, une personne tout à fait normale. La nuit, son cou s'allonge sans qu'elle le sache et sa tête se promène dans la maison."],
+["Kodama","Personnage","Terre","C","L'esprit qui habite les très vieux arbres. On dit qu'abattre un arbre habité par un kodama porte malheur."],
+["Sanctuaire shintō","Lieu","Lumière","C","On y salue les kami en s'inclinant deux fois, en frappant deux fois dans ses mains, puis en s'inclinant une dernière fois."],
+["Shimenawa","Objet","Terre","C","Une corde de paille de riz tressée, ornée de bandes de papier en zigzag. Elle marque un lieu ou un objet sacré."],
+["Baku, le mangeur de rêves","Personnage","Lumière","R","Un assemblage d'animaux, avec une trompe d'éléphant et des pattes de tigre. On lui demande de dévorer les cauchemars pour dormir en paix."],
+["Nekomata","Personnage","Feu","R","Un chat devenu très vieux dont la queue s'est fendue en deux. Selon les récits, il acquiert alors des pouvoirs étranges et marche sur ses pattes arrière."],
+["Tsukumogami","Personnage","Acier","R","Selon la croyance, un objet qui a servi pendant cent ans prend vie. Théière, sandale ou lanterne : mieux vaut ne pas jeter trop vite les vieilles affaires."],
+["Hyakki Yagyō","Pouvoir","Ombre","R","La « parade nocturne des cent démons ». Au Moyen Âge, on disait qu'elle parcourait les rues de la capitale certaines nuits d'été, et qu'il valait mieux rester chez soi."],
+["Mont Osore","Lieu","Feu","R","Un paysage volcanique de soufre et de lac au nord de Honshū. Dans la tradition populaire, c'est une porte vers l'au-delà."],
+["Raijin, dieu du tonnerre","Personnage","Foudre","SR","Il bat sur un cercle de tambours pour faire gronder l'orage. Les estampes et les paravents japonais le montrent souvent aux côtés de Fūjin, le dieu du vent."],
+["Nue","Personnage","Foudre","SR","Une chimère à tête de singe, corps de tanuki et queue de serpent. Elle surgit dans un nuage noir pour tourmenter l'empereur, d'après le Dit des Heike."],
+["Rashōmon, la porte maudite","Lieu","Ombre","SR","La grande porte sud de l'ancienne capitale Heian-kyō, aujourd'hui Kyōto. Dans les légendes, des démons s'y abritent, comme celui à qui le guerrier Watanabe no Tsuna a coupé le bras."],
+["Miroir Yata no Kagami","Objet","Lumière","SR","L'un des trois trésors sacrés du Japon. Il aurait servi à faire sortir la déesse Amaterasu de la grotte où elle s'était cachée.","","",1],
+["Ibaraki-dōji","Personnage","Ombre","UR","Le plus fidèle compagnon de Shuten-dōji. La légende raconte que Watanabe no Tsuna lui a tranché un bras à la porte Rashōmon."],
+["Tamamo-no-Mae","Personnage","Feu","UR","Une renarde à neuf queues déguisée en courtisane de l'empereur Toba. Démasquée, elle s'enfuit et se serait transformée en pierre, la Sesshō-seki.","","",1],
+["Amaterasu, déesse du soleil","Personnage","Lumière","L","La principale divinité du shintō. Quand elle s'est cachée dans une grotte, le monde a plongé dans l'obscurité jusqu'à ce que les autres dieux l'en fassent sortir.","","",1],
+["Kitsune, Forêt d'automne","Éveil","Feu","ALT","Version alternative : la renarde à neuf queues traverse une forêt de feuilles rouges au crépuscule.","","Kitsune à neuf queues"],
+["Yuki-onna, Tempête de neige","Éveil","Vent","ALT","Version alternative : la dame des neiges disparaît dans le blizzard, ne laissant derrière elle que ses empreintes.","","Yuki-onna",1]
+],
+ol:[
+["Centaure","Personnage","Terre","C","Mi-homme, mi-cheval. La plupart sont sauvages et turbulents, sauf Chiron, qui a élevé plusieurs héros."],
+["Harpie","Personnage","Vent","C","Une créature ailée, mi-femme, mi-oiseau, qui vole la nourriture de ses victimes. Elle a tourmenté le roi Phinée."],
+["Sirène","Personnage","Eau","C","Son chant attire les marins vers les récifs. Les Grecs les imaginaient d'abord mi-femmes, mi-oiseaux ; la sirène à queue de poisson est apparue plus tard."],
+["Amphore grecque","Objet","Terre","C","Un grand vase à deux anses pour conserver le vin, l'huile ou le grain. Les plus belles sont décorées de scènes de la mythologie."],
+["Agora d'Athènes","Lieu","Terre","C","La grande place d'Athènes : marché, tribunal et lieu de débat. Socrate y interpellait les passants."],
+["« Rien de trop. »","Citation","Lumière","C","L'une des maximes gravées au temple de Delphes, avec « Connais-toi toi-même ». Elle invite à la mesure en toute chose."],
+["Chouette d'Athéna","Personnage","Lumière","R","Le symbole de la déesse de la sagesse. Les pièces d'argent d'Athènes la portaient d'un côté."],
+["Minotaure","Personnage","Terre","R","Mi-homme, mi-taureau, enfermé dans le labyrinthe du roi Minos, en Crète, jusqu'à ce que Thésée le vainque."],
+["Pan","Personnage","Terre","R","Dieu des bergers et des bois, mi-homme, mi-bouc. Il joue de la flûte de roseaux, la syrinx, et son cri soudain a donné le mot « panique »."],
+["Fil d'Ariane","Objet","Lumière","R","La pelote que la princesse Ariane a donnée à Thésée pour retrouver la sortie du labyrinthe."],
+["Champs Élysées","Lieu","Lumière","R","Dans la mythologie grecque, le séjour paisible des âmes des héros et des justes après la mort."],
+["Héraclès","Personnage","Terre","SR","Le plus célèbre des héros grecs, fils de Zeus. Il a accompli douze travaux, dont la capture du lion de Némée."],
+["Aphrodite, déesse de l'amour","Personnage","Eau","SR","Née de l'écume de la mer, d'après la tradition. Elle règne sur l'amour et la beauté."],
+["Dionysos, dieu du vin","Personnage","Terre","SR","Dieu de la vigne, du théâtre et des fêtes. Les Athéniens lui consacraient de grands concours de tragédies."],
+["Cheval de Troie","Objet","Terre","SR","Le grand cheval de bois laissé devant Troie. Des guerriers grecs s'y cachaient, et c'est ainsi que la ville est tombée.","","",1],
+["Arès, dieu de la guerre","Personnage","Feu","UR","Dieu de la bataille violente. Contrairement à Athéna, il aime la guerre pour elle-même, et les Grecs ne l'appréciaient guère."],
+["Achille","Personnage","Acier","UR","Le plus grand guerrier grec de la guerre de Troie. Son seul point faible : le talon par lequel sa mère l'avait tenu en le plongeant dans le Styx.","","",1],
+["Prométhée, voleur de feu","Personnage","Feu","L","Le Titan qui a dérobé le feu aux dieux pour le donner aux humains. Zeus l'a puni en l'enchaînant à un rocher.","","",1],
+["Méduse, Regard de pierre","Éveil","Ombre","ALT","Version alternative : la Gorgone au regard fatal, entourée de statues de ceux qui ont croisé ses yeux.","","Méduse"],
+["Athéna, Aube sur l'Acropole","Éveil","Lumière","ALT","Version alternative : la déesse veille sur Athènes au lever du soleil, devant son temple.","","Athéna, déesse de la sagesse",1]
+],
+vg:[
+["Breakout","Jeu","Foudre","C","Atari, 1976. Une balle, une raquette et un mur de briques à démolir. Il a lancé tout un genre de jeux de casse-briques.","Casse-briques, arcade"],
+["Asteroids","Jeu","Foudre","C","Atari, 1979. Un petit vaisseau doit détruire des rochers qui se divisent en morceaux de plus en plus nombreux.","Tir spatial, arcade"],
+["Frogger","Jeu","Terre","C","Konami, 1981. Faire traverser une route très fréquentée, puis une rivière, à une grenouille.","Arcade"],
+["Nintendo Entertainment System","Console","Acier","C","Nintendo, 1983 au Japon (Famicom), 1985 aux États-Unis. La console qui a relancé le jeu vidéo de salon après la crise de 1983.","Console de salon"],
+["Mega Drive","Console","Acier","C","Sega, 1988 au Japon (Genesis en Amérique du Nord). Une console 16 bits qui a fait une vive concurrence à Nintendo.","Console de salon"],
+["Game & Watch","Console","Acier","C","Nintendo, 1980. Un petit appareil à écran LCD qui ne contient qu'un seul jeu, conçu par Gunpei Yokoi.","Console portable"],
+["Metroid","Jeu","Foudre","R","Nintendo, 1986. Explorer une planète hostile et récupérer peu à peu des capacités pour accéder à de nouvelles zones.","Exploration, action"],
+["Castlevania","Jeu","Ombre","R","Konami, 1986. Un chasseur de vampires affronte un château rempli de monstres classiques du cinéma d'épouvante.","Action, horreur"],
+["Mega Man","Jeu","Acier","R","Capcom, 1987. Un petit robot affronte huit boss et récupère leurs pouvoirs, dans un jeu connu pour sa difficulté.","Plateforme, action"],
+["Civilization","Jeu","Terre","R","MicroProse, 1991, conçu par Sid Meier. Fonder une ville, la faire grandir et mener une civilisation à travers les siècles.","Stratégie"],
+["Nintendo 64","Console","Acier","R","Nintendo, 1996. Sa manette à trois branches, avec un stick analogique, a ouvert la voie aux jeux en 3D.","Console de salon"],
+["Metal Gear Solid","Jeu","Ombre","SR","Konami, 1998, conçu par Hideo Kojima. Un agent infiltre une base en évitant d'être vu, avec une mise en scène très proche du cinéma.","Infiltration"],
+["Portal","Jeu","Acier","SR","Valve, 2007. Résoudre des énigmes en ouvrant des portails dans les murs. Un jeu court, très apprécié pour son humour.","Puzzle, réflexion","",1],
+["The Witcher 3 : Wild Hunt","Jeu","Ombre","SR","CD Projekt RED, 2015. Un chasseur de monstres parcourt un vaste monde ouvert inspiré du folklore slave.","Jeu de rôle"],
+["Les Sims","Jeu","Lumière","SR","Maxis, 2000, conçu par Will Wright. Faire vivre des personnages virtuels : leur maison, leurs métiers et leurs relations.","Simulation de vie"],
+["Grand Theft Auto V","Jeu","Feu","UR","Rockstar Games, 2013. Un monde ouvert avec trois personnages jouables. L'un des jeux les plus vendus de l'histoire.","Action, monde ouvert"],
+["The Legend of Zelda : Breath of the Wild","Jeu","Vent","UR","Nintendo, 2017, sur Switch et Wii U. Un monde ouvert qui laisse le joueur aller où il veut dès le début.","Aventure, monde ouvert","",1],
+["PlayStation 2","Console","Acier","L","Sony, 2000. Avec plus de 150 millions d'exemplaires vendus, elle est souvent citée comme la console la plus vendue de l'histoire.","Console de salon","",1],
+["Resident Evil (remake de 2002)","Éveil","Ombre","ALT","Version alternative : le remake de 2002 sur GameCube, avec des décors refaits et de nouvelles surprises dans le manoir.","Survival horror","Resident Evil"],
+["Donkey Kong (Game Boy, 1994)","Éveil","Terre","ALT","Version alternative : une version de 1994 sur Game Boy qui reprend les premiers niveaux du jeu d'arcade, puis en ajoute beaucoup d'autres.","Plateforme","Donkey Kong",1]
+],
+mg:[
+["Goldorak","Anime","Acier","C","Dessin animé de 1975 d'après une œuvre de Go Nagai. Un robot géant défend la Terre contre des envahisseurs. Il a marqué toute une génération en France.","Mecha"],
+["Albator","Manga","Ombre","C","Leiji Matsumoto, 1977. Un capitaine pirate de l'espace, borgne et solitaire, parcourt les étoiles à bord de son vaisseau.","Space opera"],
+["Dr Slump","Manga","Vent","C","Akira Toriyama, 1980–1984. Les aventures comiques d'un inventeur maladroit et d'une petite androïde dans un village loufoque.","Comédie"],
+["Lupin III","Manga","Ombre","C","Monkey Punch, 1967. Les aventures d'un gentleman cambrioleur, petit-fils du héros de roman Arsène Lupin.","Comédie, cambriolage"],
+["Nicky Larson (City Hunter)","Manga","Feu","C","Tsukasa Hōjō, 1985–1991. Un détective privé à la gâchette précieuse, dans le quartier de Shinjuku à Tokyo.","Action, détective"],
+["Ranma ½","Manga","Eau","C","Rumiko Takahashi, 1987–1996. Un adolescent champion d'arts martiaux se transforme en fille au contact de l'eau froide.","Arts martiaux, comédie"],
+["Princesse Mononoké","Anime","Terre","R","Studio Ghibli, Hayao Miyazaki, 1997. Un jeune guerrier se retrouve au milieu du conflit entre les humains et les esprits de la forêt.","Film d'animation, fantasy"],
+["Hunter × Hunter","Manga","Vent","R","Yoshihiro Togashi, depuis 1998. Un garçon passe l'examen pour devenir Hunter, un aventurier d'élite, afin de retrouver son père.","Shōnen, aventure"],
+["Bleach","Manga","Ombre","R","Tite Kubo, 2001–2016. Un lycéen voit les fantômes et devient « shinigami », chargé de guider les âmes.","Shōnen, action"],
+["Berserk","Manga","Ombre","R","Kentarō Miura, depuis 1989. Un mercenaire solitaire se bat contre des démons dans un monde sombre inspiré du Moyen Âge européen.","Dark fantasy"],
+["Le Château dans le ciel","Anime","Vent","R","Studio Ghibli, Hayao Miyazaki, 1986. Une fillette et un garçon cherchent une île flottante légendaire.","Film d'animation, aventure"],
+["Jujutsu Kaisen","Manga","Ombre","SR","Gege Akutami, 2018–2024. Un lycéen avale un objet maudit et rejoint une école d'exorcistes.","Shōnen, action"],
+["My Hero Academia","Manga","Foudre","SR","Kōhei Horikoshi, 2014–2024. Dans un monde où presque tout le monde a un pouvoir, un garçon sans don rêve de devenir un héros.","Shōnen, super-héros"],
+["Your Name (Kimi no na wa)","Anime","Lumière","SR","Makoto Shinkai, 2016. Deux adolescents qui ne se connaissent pas échangent leurs corps dans leur sommeil.","Film d'animation, romance","",1],
+["Monster","Manga","Ombre","SR","Naoki Urasawa, 1994–2001. Un chirurgien talentueux sauve la vie d'un enfant et doit ensuite en assumer les conséquences.","Thriller, mystère"],
+["Nausicaä de la vallée du vent","Manga","Vent","UR","Hayao Miyazaki, manga de 1982 à 1994 et film de 1984. Une princesse tente de réconcilier les humains et une forêt toxique.","Fantasy, écologie"],
+["Mobile Suit Gundam","Anime","Acier","UR","Sunrise, 1979, créé par Yoshiyuki Tomino. Des soldats pilotent de grands robots dans une guerre spatiale. Il a lancé le genre du « robot réaliste ».","Mecha","",1],
+["Le Roi Léo (Kimba)","Anime","Lumière","L","Osamu Tezuka, manga de 1950 à 1954. Son adaptation de 1965 est souvent citée comme la première série télévisée japonaise en couleur.","Animé, aventure","",1],
+["Death Note (animé)","Éveil","Ombre","ALT","Version alternative : l'adaptation animée du studio Madhouse, diffusée en 2006 et 2007.","Thriller, animé","Death Note"],
+["Demon Slayer (animé)","Éveil","Eau","ALT","Version alternative : l'adaptation animée du studio ufotable, diffusée à partir de 2019.","Shōnen, animé","Demon Slayer (Kimetsu no Yaiba)",1]
+]
+};
+Object.keys(MORE).forEach(k=>RAW[k].push(...MORE[k]));
+
+const CARDS=[];let _gn=0;
+SERIES.forEach(s=>RAW[s.id].forEach((r,i)=>CARDS.push({id:s.id+'-'+pad(i+1,2),n:++_gn,sn:i+1,s:s.id,name:r[0],t:r[1],e:r[2],r:RARI[r[3]],txt:r[4],u:s.id,g:r[5]||'',alt:r[3]==='ALT',base:r[6]||null,shop:!!r[7]})));
+CARDS.forEach(c=>{if(c.base){const b=CARDS.find(x=>x.s===c.s&&x.name===c.base);c.base=b?b.id:null}});
+const BY={};CARDS.forEach(c=>BY[c.id]=c);
+
+/* Une carte compte dans une série, une catégorie et un élément : trois pages d'album à la fois. */
+const GROUPS=[{k:'series',label:'Séries'},{k:'types',label:'Catégories'},{k:'elems',label:'Éléments'}];
+const PAGES=[
+  ...SERIES.map(s=>({key:'s:'+s.id,g:'series',name:s.name,sub:s.tag,f:c=>c.s===s.id})),
+  ...TYPES.map(t=>({key:'t:'+t[0],g:'types',name:t[1],sub:'Toutes séries',f:c=>c.t===t[0]})),
+  ...ELEMS.map(e=>({key:'e:'+e,g:'elems',name:e,sub:'Toutes séries',f:c=>c.e===e}))
+];
+PAGES.forEach(p=>{p.cards=CARDS.filter(p.f);p.reward=p.cards.length*25});
+const PAGEBY={};PAGES.forEach(p=>PAGEBY[p.key]=p);
+
+const PITY=19;
+const PACKS={
+  std:{name:'Booster Vault',cost:100,n:5,w:RAR.map(r=>r.w),min:1,desc:'Toutes les collections'},
+  ser:{name:'Booster de collection',cost:150,n:5,w:RAR.map(r=>r.w),min:1,desc:'Une seule collection au choix'},
+  pre:{name:'Booster Prestige',cost:400,n:3,w:[0,0,52,32,10,6],min:2,desc:'Super Rare minimum et bien plus de chances de Légendaire'}
+};
+const EVENT=SERIES[new Date().getMonth()%4];
+const EVEND=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+const NPCS=[
+  {n:'Mika',c:'Osaka',m:'Il me manque une carte pour boucler ma page des Lieux.'},
+  {n:'Théo',c:'Lyon',m:'Je collectionne depuis la première extension, et je trie enfin mes doublons.'},
+  {n:'Aiko',c:'Sapporo',m:'Je fais des échanges équitables, jamais de mauvaise surprise.'},
+  {n:'Baptiste',c:'Nantes',m:'Je cherche surtout des holos, mais je prends tout ce qui brille un peu.'},
+  {n:'Nao',c:'Kyoto',m:'Mon classeur est presque plein, aide-moi à le finir.'}
+];
+const TITLES=[[0,'Curieux'],[20,'Apprenti collectionneur'],[70,'Collectionneur'],[160,'Archiviste'],[300,'Maître archiviste'],[450,'Gardien du Vault']];
+
+/* ---------- Illustrations générées ---------- */
+let _u=0;
+function scenery(k,R,h){
+  let o='';
+  if(k==='yk'){
+    for(let i=0;i<7;i++){const x=R()*200,hh=40+R()*64,w=2+R()*2;
+      o+=`<rect x="${x.toFixed(1)}" y="${(160-hh).toFixed(1)}" width="${w.toFixed(1)}" height="${hh.toFixed(1)}" fill="hsl(${h} 35% 9%)"/>`}
+    for(let i=0;i<3;i++){const x=R()*200,y=100+R()*50;
+      o+=`<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${(34+R()*24).toFixed(1)}" ry="${(5+R()*5).toFixed(1)}" fill="#fff" opacity=".14"/>`}
+    const tx=34+R()*132;
+    o+=`<path d="M${(tx-14).toFixed(1)} 158V122M${(tx+14).toFixed(1)} 158V122M${(tx-20).toFixed(1)} 118H${(tx+20).toFixed(1)}M${(tx-16).toFixed(1)} 128H${(tx+16).toFixed(1)}" stroke="#ff5a4a" stroke-width="3.2" stroke-linecap="round" fill="none"/>`;
+    for(let i=0;i<5;i++){const x=R()*200,y=96+R()*50;
+      o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7" fill="#ffb347" opacity=".22"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.4" fill="#ffd27a"/>`}
+  }else if(k==='ol'){
+    o+=`<path d="M0 150Q25 140 50 150T100 150T150 150T200 150V160H0Z" fill="hsl(${h} 60% 18%)" opacity=".9"/>`;
+    for(let i=0;i<3;i++){const x=R()*200,y=84+R()*30,r=10+R()*10;
+      o+=`<g fill="#fff" opacity="${(.14+R()*.2).toFixed(2)}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/><circle cx="${(x+r*.9).toFixed(1)}" cy="${(y+3).toFixed(1)}" r="${(r*.75).toFixed(1)}"/></g>`}
+    const x0=34+R()*30;
+    o+=`<path d="M${(x0-8).toFixed(1)} 90H${(x0+107).toFixed(1)}L${(x0+49.5).toFixed(1)} 70Z" fill="#f3efe4" opacity=".92"/>`;
+    for(let i=0;i<5;i++){o+=`<rect x="${(x0+i*22).toFixed(1)}" y="94" width="9" height="50" fill="#f3efe4" opacity=".88"/><rect x="${(x0+i*22-2).toFixed(1)}" y="90" width="13" height="5" fill="#f3efe4"/>`}
+    o+=`<rect x="${(x0-12).toFixed(1)}" y="144" width="123" height="6" fill="#e5dfce"/>`;
+  }else if(k==='vg'){
+    for(let i=0;i<16;i++){o+=`<rect x="${(R()*196)|0}" y="${(R()*86)|0}" width="2" height="2" fill="#fff" opacity="${(.4+R()*.5).toFixed(2)}"/>`}
+    for(let i=0;i<10;i++){const hh=12+((R()*4)|0)*8;o+=`<rect x="${i*20}" y="${160-hh}" width="20" height="${hh}" fill="hsl(${h} 45% 14%)"/>`}
+    for(let i=0;i<4;i++){const x=((R()*160)|0),y=88+((R()*6)|0)*8,w=24+((R()*4)|0)*8;
+      o+=`<rect x="${x}" y="${y}" width="${w}" height="8" fill="hsl(${h} 40% 22%)"/><rect x="${x}" y="${y}" width="${w}" height="3" fill="hsl(${h} 75% 55%)"/>`}
+    const cx=(R()*150)|0;
+    o+=`<rect x="${cx}" y="58" width="32" height="8" fill="#fff" opacity=".28"/><rect x="${cx+8}" y="50" width="16" height="8" fill="#fff" opacity=".28"/>`;
+  }else if(k==='mg'){
+    for(let i=0;i<22;i++){const a=i*Math.PI/11,r1=30+R()*20,r2=130+R()*30;
+      o+=`<path d="M${(100+Math.cos(a)*r1).toFixed(1)} ${(80+Math.sin(a)*r1).toFixed(1)}L${(100+Math.cos(a)*r2).toFixed(1)} ${(80+Math.sin(a)*r2).toFixed(1)}" stroke="#fff" stroke-width="${(.6+R()*1.2).toFixed(1)}" opacity="${(.12+R()*.16).toFixed(2)}"/>`}
+    for(let rw=0;rw<8;rw++){const y=100+rw*8;for(let x=(rw%2)*4;x<200;x+=8){o+=`<circle cx="${x}" cy="${y}" r="${(1+rw*.22).toFixed(1)}" fill="#0a0d1a" opacity=".5"/>`}}
+    for(let i=0;i<9;i++){o+=`<ellipse cx="${(R()*200).toFixed(1)}" cy="${(R()*110).toFixed(1)}" rx="3.2" ry="1.7" transform="rotate(${(R()*180)|0} 100 80)" fill="#ffc8e0" opacity="${(.5+R()*.4).toFixed(2)}"/>`}
+  }else if(k==='ce'){
+    for(let i=0;i<5;i++){const x=R()*200,y=96+R()*54,r=11+R()*13;
+      o+=`<g fill="#fff" opacity="${(.16+R()*.26).toFixed(2)}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/><circle cx="${(x+r*.9).toFixed(1)}" cy="${(y+3).toFixed(1)}" r="${(r*.78).toFixed(1)}"/><circle cx="${(x-r*.9).toFixed(1)}" cy="${(y+4).toFixed(1)}" r="${(r*.7).toFixed(1)}"/></g>`}
+    for(let i=0;i<2;i++){const x=28+R()*144,y=70+R()*34,w=16+R()*16;
+      o+=`<path d="M${(x-w).toFixed(1)} ${y.toFixed(1)}Q${x.toFixed(1)} ${(y-9).toFixed(1)} ${(x+w).toFixed(1)} ${y.toFixed(1)}L${(x+w*.5).toFixed(1)} ${(y+w*.7).toFixed(1)}L${x.toFixed(1)} ${(y+w*1.25).toFixed(1)}L${(x-w*.5).toFixed(1)} ${(y+w*.7).toFixed(1)}Z" fill="hsl(${h} 45% 12%)" opacity=".8"/>`}
+  }else if(k==='ks'){
+    let a='M0 160V'+(92+R()*20).toFixed(1),b='M0 160V'+(112+R()*14).toFixed(1);
+    for(let i=1;i<=8;i++){a+=`L${i*25} ${(70+R()*40).toFixed(1)}`;b+=`L${i*25} ${(104+R()*26).toFixed(1)}`}
+    o+=`<path d="${a}V160Z" fill="hsl(${h} 38% 24%)" opacity=".8"/><path d="${b}V160Z" fill="hsl(${h} 45% 10%)"/>`;
+    const tx=30+R()*140;
+    o+=`<path d="M${(tx-13).toFixed(1)} 156V128M${(tx+13).toFixed(1)} 156V128M${(tx-19).toFixed(1)} 124H${(tx+19).toFixed(1)}M${(tx-15).toFixed(1)} 134H${(tx+15).toFixed(1)}" stroke="hsl(${h} 70% 55%)" stroke-width="3.2" stroke-linecap="round" fill="none"/>`;
+  }else if(k==='nr'){
+    for(let x=0;x<200;x+=15){const hh=34+R()*80;
+      o+=`<rect x="${x}" y="${(160-hh).toFixed(1)}" width="13" height="${hh.toFixed(1)}" fill="hsl(${h} 45% ${(6+R()*6).toFixed(1)}%)"/>`;
+      for(let j=0;j<4;j++){if(R()<.55){o+=`<rect x="${(x+2+R()*7)|0}" y="${(160-hh+4+j*12).toFixed(1)}" width="3" height="4" fill="${R()<.5?'#33e6ff':'#ff4fd8'}" opacity=".85"/>`}}}
+  }else{
+    const d=`hsl(${h} 40% 10%)`;
+    o+=`<rect x="14" y="112" width="172" height="48" fill="${d}"/><rect x="88" y="78" width="24" height="40" fill="${d}"/><path d="M84 78L100 62L116 78Z" fill="${d}"/><circle cx="100" cy="90" r="6" fill="#ffe9a8"/>`;
+    for(let i=0;i<7;i++){for(let j=0;j<2;j++){o+=`<rect x="${24+i*23}" y="${120+j*18}" width="12" height="9" fill="#ffe9a8" opacity="${R()<.7?.9:.15}"/>`}}
+  }
+  return o;
+}
+function glyph(c,R,el,ink){
+  const f=ink||'#0a0d1a';
+  switch(c.t){
+    case 'Personnage':{
+      const hr=12+R()*4,sw=34+R()*10;
+      return `<circle cx="100" cy="64" r="${hr.toFixed(1)}" fill="${f}" stroke="${el}" stroke-width="1.6"/><path d="M${(100-sw).toFixed(1)} 160C${(102-sw).toFixed(1)} 116 82 94 100 94S${(98+sw).toFixed(1)} 116 ${(100+sw).toFixed(1)} 160Z" fill="${f}" stroke="${el}" stroke-width="1.6"/><path d="M86 96L114 96L110 106H90Z" fill="${el}" opacity=".9"/>`}
+    case 'Pouvoir':{
+      let o='';
+      for(let i=0;i<3;i++){const x0=36+i*18+R()*10,y0=132-R()*10,x1=160-i*10,y1=22+i*14;
+        o+=`<path d="M${x0.toFixed(1)} ${y0.toFixed(1)}Q100 ${(78+R()*10).toFixed(1)} ${x1} ${y1}" stroke="${el}" stroke-width="${5-i}" fill="none" stroke-linecap="round" opacity=".95"/>`}
+      return o;}
+    case 'Lieu':
+      return `<path d="M68 94L100 70L132 94Z" fill="${f}" stroke="${el}" stroke-width="1.6" stroke-linejoin="round"/><rect x="78" y="94" width="44" height="40" fill="${f}" stroke="${el}" stroke-width="1.6"/><rect x="94" y="110" width="12" height="24" fill="${el}" opacity=".85"/><path d="M100 70V56" stroke="${el}" stroke-width="2"/>`;
+    case 'Objet':
+      return `<g transform="rotate(${(-18+R()*36).toFixed(1)} 100 88)"><rect x="82" y="70" width="36" height="36" rx="3" fill="${f}" stroke="${el}" stroke-width="2" transform="rotate(45 100 88)"/><circle cx="100" cy="88" r="7" fill="${el}"/></g>`;
+    case 'Citation':
+      return `<path d="M52 56H148a8 8 0 0 1 8 8v40a8 8 0 0 1-8 8h-44l-16 16 2-16H52a8 8 0 0 1-8-8V64a8 8 0 0 1 8-8z" fill="${f}" stroke="${el}" stroke-width="1.8"/><path d="M64 76H136M64 92H116" stroke="${el}" stroke-width="4" stroke-linecap="round"/>`;
+    case 'Manga':
+      return `<rect x="58" y="54" width="84" height="64" rx="3" fill="${f}" stroke="${el}" stroke-width="2"/><path d="M100 54V118M58 86H100M100 76H142" stroke="${el}" stroke-width="2" fill="none"/>`;
+    case 'Anime':
+      return `<rect x="56" y="58" width="88" height="56" rx="6" fill="${f}" stroke="${el}" stroke-width="2"/><path d="M92 74L116 86L92 98Z" fill="${el}"/><path d="M80 124H120" stroke="${el}" stroke-width="3" stroke-linecap="round"/>`;
+    case 'Jeu':
+      return `<path d="M64 74h72a14 14 0 0 1 13 17l-6 24a8 8 0 0 1-14 3l-6-9H77l-6 9a8 8 0 0 1-14-3l-6-24a14 14 0 0 1 13-17z" fill="${f}" stroke="${el}" stroke-width="2"/><path d="M78 84v14M71 91h14" stroke="${el}" stroke-width="3"/><circle cx="122" cy="88" r="4" fill="${el}"/><circle cx="131" cy="96" r="4" fill="${el}"/>`;
+    case 'Console':
+      return `<rect x="84" y="60" width="32" height="24" rx="2" fill="${f}" stroke="${el}" stroke-width="2"/><rect x="52" y="82" width="96" height="30" rx="5" fill="${f}" stroke="${el}" stroke-width="2"/><rect x="64" y="92" width="36" height="6" fill="${el}"/><circle cx="128" cy="97" r="5" fill="${el}"/>`;
+    default:{
+      let p='';
+      for(let i=0;i<16;i++){const a=i*Math.PI/8-Math.PI/2,r=i%2?22:50;p+=`${(100+r*Math.cos(a)).toFixed(1)},${(86+r*Math.sin(a)).toFixed(1)} `}
+      return `<polygon points="${p}" fill="${el}" opacity=".92"/><circle cx="100" cy="86" r="14" fill="${f}"/>`}
+  }
+}
+const IMG={};
+function idb(){return new Promise((res,rej)=>{try{const r=indexedDB.open('otaku-img',1);r.onupgradeneeded=()=>r.result.createObjectStore('i');r.onsuccess=()=>res(r.result);r.onerror=()=>rej()}catch(e){rej()}})}
+function imgLoad(){idb().then(db=>{const q=db.transaction('i').objectStore('i').openCursor();q.onsuccess=()=>{const c=q.result;if(c){IMG[c.key]=c.value;c.continue()}else render()}}).catch(()=>{})}
+function imgSave(id,u){IMG[id]=u;return idb().then(db=>{db.transaction('i','readwrite').objectStore('i').put(u,id)}).catch(()=>{})}
+function imgDel(id){delete IMG[id];return idb().then(db=>{db.transaction('i','readwrite').objectStore('i').delete(id)}).catch(()=>{})}
+function imgFile(id,f){
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,480/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);imgSave(id,cv.toDataURL('image/jpeg',.82)).then(()=>{toast('Image ajoutée');render();renderOv()})};im.src=r.result};r.readAsDataURL(f);
+}
+const MOTIFS=[
+ (x,y,r)=>`<path d="M${x} ${y-r}L${x+r} ${y}L${x} ${y+r}L${x-r} ${y}Z"/>`,
+ (x,y,r)=>`<path d="M${x} ${y-r}L${x+r*.9} ${y+r*.7}H${x-r*.9}Z"/>`,
+ (x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}"/><circle cx="${x}" cy="${y}" r="${r*.45}" fill="#000" opacity=".35"/>`,
+ (x,y,r)=>`<path d="M${x-r} ${y}Q${x} ${y-r*1.3} ${x+r} ${y}Q${x} ${y+r*1.3} ${x-r} ${y}Z"/>`,
+ (x,y,r)=>`<path d="M${x} ${y-r}L${x+r*.3} ${y-r*.3}L${x+r} ${y}L${x+r*.3} ${y+r*.3}L${x} ${y+r}L${x-r*.3} ${y+r*.3}L${x-r} ${y}L${x-r*.3} ${y-r*.3}Z"/>`,
+ (x,y,r)=>`<rect x="${x-r*.8}" y="${y-r*.8}" width="${r*1.6}" height="${r*1.6}" rx="${r*.3}" transform="rotate(20 ${x} ${y})"/>`,
+ (x,y,r)=>`<path d="M${x-r} ${y+r*.6}Q${x-r*.2} ${y-r*1.1} ${x+r} ${y-r*.4}Q${x+r*.1} ${y} ${x+r*.6} ${y+r*.8}Q${x} ${y+r*.3} ${x-r} ${y+r*.6}Z"/>`,
+ (x,y,r)=>`<path d="M${x-r} ${y-r*.5}H${x+r}M${x-r*.7} ${y}H${x+r*.7}M${x-r*.4} ${y+r*.5}H${x+r*.4}" stroke-width="${r*.28}" stroke="currentColor" fill="none" stroke-linecap="round"/>`
+];
+function monogram(n){const w=n.replace(/[«»"(),:.!?'’]/g,' ').split(/\s+/).filter(x=>x.length>2&&!/^(les|des|the|de|du|la|le|et|dans|aux|ranma)$/i.test(x));return ((w[0]||n)[0]+((w[1]||'')[0]||'')).toUpperCase()}
+function emblem(c,R,el){
+  const m=MOTIFS[hash(c.id+'m')%MOTIFS.length],x=162,y=122,r=15;
+  return `<text x="100" y="98" text-anchor="middle" font-family="Unbounded,sans-serif" font-weight="800" font-size="${c.alt?30:46}" fill="#fff" opacity=".13">${esc(monogram(c.name))}</text><g color="#fff" fill="${el}" stroke="#fff" stroke-opacity=".75" stroke-width="1.2"><circle cx="${x}" cy="${y}" r="${r+6}" fill="rgba(0,0,0,.35)"/>${m(x,y,r)}</g>`;
+}
+function art(c){
+  if(IMG[c.id])return `<img class="pic" src="${IMG[c.id]}" alt="">`;
+  const id='a'+(++_u),R=rng(hash(c.id)),el=EL[c.e],h0=UH[c.u],h=c.alt?(h0+150)%360:h0;
+  const sx=40+R()*120,sy=28+R()*34,sr=16+R()*12;
+  const frame=c.alt?`<rect x="3" y="3" width="194" height="154" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.4"/><path d="M0 120L120 0H150L0 150Z" fill="#fff" opacity=".08"/>`:'';
+  return `<svg viewBox="0 0 200 160" preserveAspectRatio="xMidYMid slice"${c.s==='vg'?' shape-rendering="crispEdges"':''} aria-hidden="true"><defs><linearGradient id="${id}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${h} 55% 16%)"/><stop offset=".6" stop-color="hsl(${(h+25)%360} 60% 34%)"/><stop offset="1" stop-color="hsl(${(h+50)%360} 70% 58%)"/></linearGradient><radialGradient id="${id}g"><stop offset="0" stop-color="${el}" stop-opacity=".95"/><stop offset="1" stop-color="${el}" stop-opacity="0"/></radialGradient></defs><rect width="200" height="160" fill="url(#${id}b)"/><circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${(sr*2.2).toFixed(1)}" fill="url(#${id}g)"/><circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${sr.toFixed(1)}" fill="${el}" opacity=".92"/>${scenery(c.u,R,h)}${glyph(c,R,el)}${emblem(c,R,el)}${frame}</svg>`;
+}
+function lockArt(c){
+  const id='a'+(++_u);
+  return `<svg viewBox="0 0 200 160" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151b33"/><stop offset="1" stop-color="#232c52"/></linearGradient></defs><rect width="200" height="160" fill="url(#${id})"/>${glyph(c,rng(hash(c.id)),'#34406e','#10152a')}<text x="100" y="18" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#6b79b0" letter-spacing="2">NON DÉCOUVERTE</text></svg>`;
+}
+function packSVG(h1,h2,tag){
+  const id='p'+(++_u);
+  return `<svg viewBox="0 0 120 170" class="packsvg" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h1} 65% 40%)"/><stop offset="1" stop-color="hsl(${h2} 70% 20%)"/></linearGradient></defs><rect x="12" y="8" width="96" height="154" rx="6" fill="url(#${id})"/><path d="M12 62L108 24V50L12 98z" fill="#fff" opacity=".07"/><rect x="12" y="8" width="96" height="10" rx="4" fill="#fff" opacity=".18"/><rect x="12" y="152" width="96" height="10" rx="4" fill="#fff" opacity=".18"/><path d="M60 50l24 30-24 30-24-30z" fill="none" stroke="#fff" stroke-width="2.5" opacity=".9"/><path d="M60 62l12 18-12 18-12-18z" fill="#fff" opacity=".3"/><text x="60" y="136" text-anchor="middle" font-family="Unbounded,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="1.5">${tag}</text></svg>`;
+}
+const BACK=`<svg viewBox="0 0 100 140" aria-hidden="true" style="width:60%;height:auto"><path d="M50 30l22 30-22 30-22-30z" fill="none" stroke="#9aa6ff" stroke-width="2.5"/><path d="M50 43l12 17-12 17-12-17z" fill="#9aa6ff" opacity=".35"/></svg>`;
+
+/* ---------- État et sauvegarde ---------- */
+const KEY='otaku-vault-v3';
+let canStore=false;
+try{localStorage.setItem('ov-t','1');localStorage.removeItem('ov-t');canStore=true}catch(e){}
+function fresh(){return{v:3,name:'Collectionneur',coins:600,pts:0,col:{},wish:[],opened:0,pity:0,trades:0,streak:0,lastDaily:'',claimed:{},ach:{},hist:[],best:0,theme:'',starter:false,starterSeen:false,sound:true}}
+let S=null,firstRun=false;
+try{const raw=canStore&&localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&o.v===3&&o.col)S=Object.assign(fresh(),o)}}catch(e){}
+if(S)Object.keys(S.col).forEach(k=>{if(!BY[k])delete S.col[k]});
+if(S){S.hist=(S.hist||[]).filter(id=>BY[id]);S.wish=(S.wish||[]).filter(id=>BY[id])}
+if(!S){S=fresh();firstRun=true}
+function save(){if(!canStore)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const UI={tab:'home',group:'series',page:'s:yk',q:'',fr:-1,miss:false,tt:'salon',offers:null,packSeries:EVENT.id,code:'',confirm:false,ov:null,rev:null};
+
+const owns=c=>!!(S.col[c.id]&&S.col[c.id].n>0);
+const ownedN=()=>CARDS.filter(owns).length;
+const val=(c,foil)=>RAR[c.r].val*(foil?2:1);
+const PTS=[10,25,60,140,320,240],SHOPP=[0,120,300,650,1200,600];
+const pv=(c,foil)=>PTS[c.r]*(foil?2:1);
+const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2);
+const today=()=>dstr(new Date());
+function nextStreak(){if(S.lastDaily===today())return S.streak;return S.lastDaily===dstr(new Date(Date.now()-864e5))?S.streak+1:1}
+const dailyVal=s=>80+(Math.min(s,7)-1)*20;
+function pageProg(p){const own=p.cards.filter(owns).length;return{own,total:p.cards.length,pct:own/p.cards.length,done:own===p.cards.length}}
+function XP(){let x=0;CARDS.forEach(c=>{const e=S.col[c.id];if(e&&e.n>0)x+=RAR[c.r].xp+(e.f>0?2:0)});return x+S.trades*2+S.opened}
+function level(){const xp=XP();let i=0;TITLES.forEach((t,k)=>{if(xp>=t[0])i=k});return{xp,i,t:TITLES[i],next:TITLES[i+1]}}
+
+/* ---------- Tirage des boosters ---------- */
+function rollRank(w){const t=w.reduce((a,b)=>a+b,0);let x=Math.random()*t;for(let i=0;i<w.length;i++){x-=w[i];if(x<0)return i}return w.length-1}
+function rollCard(rank,pool,ev){
+  const arr=pool.filter(c=>c.r===rank),wts=arr.map(c=>c.s===ev?2:1);
+  let x=Math.random()*wts.reduce((a,b)=>a+b,0);
+  for(let i=0;i<arr.length;i++){x-=wts[i];if(x<0)return arr[i]}
+  return arr[arr.length-1];
+}
+function drawPack(type,sid){
+  const P=PACKS[type],pool=type==='ser'?CARDS.filter(c=>c.s===sid&&!c.shop):CARDS.filter(c=>!c.shop),ev=type==='ser'?null:EVENT.id,out=[];
+  for(let i=0;i<P.n;i++){
+    let w=P.w;if(i===P.n-1&&P.min>0)w=w.map((x,j)=>j<P.min?0:x);
+    out.push({c:rollCard(rollRank(w),pool,ev)});
+  }
+  if(S.pity>=PITY&&!out.some(o=>o.c.r>=4))out[out.length-1]={c:rollCard(rollRank([0,0,0,0,70,30]),pool,ev)};
+  out.forEach(o=>{
+    o.foil=Math.random()<.08;
+    const e=S.col[o.c.id]||(S.col[o.c.id]={n:0,f:0});
+    o.isNew=e.n===0;e.n++;if(o.foil)e.f++;
+    if(o.c.r>S.best)S.best=o.c.r;
+  });
+  S.pity=out.some(o=>o.c.r>=4)?0:S.pity+1;
+  S.hist=[...out.map(o=>o.c.id),...S.hist].slice(0,24);
+  return out;
+}
+
+/* ---------- Succès ---------- */
+const ACH=[
+  {id:'a1',n:'Premier booster',d:'Ouvrir un booster.',r:50,t:()=>S.opened>=1},
+  {id:'a2',n:'Dix cartes',d:'Posséder 10 cartes différentes.',r:80,t:()=>ownedN()>=10},
+  {id:'a3',n:'À mi-chemin',d:`Posséder ${CARDS.length/2} cartes différentes.`,r:200,t:()=>ownedN()>=CARDS.length/2},
+  {id:'a4',n:'Collection complète',d:`Posséder les ${CARDS.length} cartes.`,r:800,t:()=>ownedN()>=CARDS.length},
+  {id:'a5',n:'Chasseur de légendes',d:'Obtenir une carte Légendaire.',r:150,t:()=>CARDS.some(c=>c.r===4&&owns(c))},
+  {id:'a10',n:'Œil de collectionneur',d:'Obtenir une carte Alternatif.',r:200,t:()=>CARDS.some(c=>c.r===5&&owns(c))},
+  {id:'a6',n:'Reflets',d:'Obtenir une carte holo.',r:100,t:()=>Object.values(S.col).some(e=>e.f>0)},
+  {id:'a7',n:'Négociant',d:'Conclure 3 échanges.',r:100,t:()=>S.trades>=3},
+  {id:'a8',n:'Page parfaite',d:"Compléter une page de l'album.",r:150,t:()=>PAGES.some(p=>pageProg(p).done)},
+  {id:'a9',n:'Assidu',d:'Récupérer la récompense quotidienne 3 jours de suite.',r:100,t:()=>S.streak>=3}
+];
+function checkAch(){ACH.forEach(a=>{if(!S.ach[a.id]&&a.t()){S.ach[a.id]=1;S.coins+=a.r;toast(`Succès : ${a.n} (+${a.r} éclats)`)}})}
+
+/* ---------- Doublons et échanges ---------- */
+function takeOne(id){const e=S.col[id];if(!e||e.n<1)return null;let foil=false;if(e.n-e.f>0){e.n--}else{e.n--;e.f--;foil=true}if(e.n===0)delete S.col[id];return foil}
+function sellOne(id){const e=S.col[id];if(!e||e.n<2)return 0;const f=takeOne(id),v=val(BY[id],f);S.coins+=v;S.pts+=pv(BY[id],f);return v}
+function genOffers(){
+  const spare={};CARDS.forEach(c=>{const e=S.col[c.id];if(e&&e.n>1)spare[c.id]=e.n-1});
+  const missing=CARDS.filter(c=>!owns(c)&&!c.shop),wish=missing.filter(c=>S.wish.includes(c.id));
+  const used=new Set(),out=[],npcs=shuffle(NPCS.slice());let tries=0;
+  while(out.length<4&&tries<80){
+    tries++;
+    const pool=(wish.length&&Math.random()<.6)?wish:missing;if(!pool.length)break;
+    const g=pick(pool);if(used.has(g.id))continue;
+    const same=Object.keys(spare).filter(id=>spare[id]>0&&BY[id].r===g.r);
+    let ask=null;
+    if(same.length&&(Math.random()<.65||g.r===0)){ask=[pick(same)]}
+    else if(g.r>0){
+      const slots=[];Object.keys(spare).filter(id=>BY[id].r===g.r-1).forEach(id=>{for(let i=0;i<spare[id];i++)slots.push(id)});
+      if(slots.length>=2){shuffle(slots);ask=[slots[0],slots[1]]}
+    }
+    if(!ask)continue;
+    ask.forEach(id=>spare[id]--);used.add(g.id);
+    out.push({id:'o'+Date.now().toString(36)+out.length,npc:npcs[out.length%npcs.length],give:g.id,ask});
+  }
+  return out;
+}
+function validOffer(o){
+  if(owns(BY[o.give]))return false;
+  const need={};o.ask.forEach(id=>need[id]=(need[id]||0)+1);
+  for(const id in need){const e=S.col[id];if(!e||e.n-1<need[id])return false}
+  return true;
+}
+
+/* ---------- Rendu ---------- */
+const IC={
+  home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  pack:'<path d="M6 3h12l2 4v14H4V7z"/><path d="M4 7h16M12 11l3 3-3 3-3-3z"/>',
+  album:'<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+  swap:'<path d="M4 8h14m-4-4 4 4-4 4M20 16H6m4-4-4 4 4 4"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
+  moon:'<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',
+  check:'<path d="M5 12l5 5 9-10"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  vol:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>',
+  shop:'<path d="M4 8h16l-1 12H5z"/><path d="M8 8a4 4 0 0 1 8 0"/>',
+  mute:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/>'
+};
+const icon=(k,s=22)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
+const SHARD=`<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 1l5 7-5 7-5-7z" fill="#E0A21A"/><path d="M8 1l5 7H3z" fill="#fff" opacity=".4"/></svg>`;
+const LOGO=`<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 2l8 10-8 10-8-10z" fill="var(--accent)"/><path d="M12 2l8 10H4z" fill="#fff" opacity=".3"/></svg>`;
+const TABS=[['home','Accueil','home'],['packs','Boosters','pack'],['album','Album','album'],['trade','Échanges','swap'],['shop','Boutique','shop'],['me','Profil','user']];
+
+function cardHTML(c,o={}){
+  const e=S.col[c.id],own=!!o.show||!!(e&&e.n>0),foil=o.foil!==undefined?o.foil:!!(e&&e.f>0),n=e?e.n:0;
+  return `<div class="cw"><div class="card r${c.r}${own?'':' locked'}${foil&&own?' foil':''}${o.big?' big':''}"><div class="art">${own?art(c):lockArt(c)}${foil&&own?'<span class="ht">HOLO</span>':''}</div>${o.tag?`<span class="tg">${o.tag}</span>`:''}${!o.show&&n>1?`<span class="cnt">×${n}</span>`:''}<div class="cap"><div class="row"><span class="num">N°${pad(c.n)}</span><span class="rb">${RAR[c.r].code}</span></div><div class="nm">${esc(c.name)}</div><div class="sub">${esc(SER[c.s].name)} · ${c.t}</div></div></div></div>`;
+}
+const slot=c=>`<button class="slot" data-a="card" data-id="${c.id}" aria-label="${esc(c.name)}">${cardHTML(c)}</button>`;
+
+function renderHead(){
+  $('#head').innerHTML=`<span class="brand">${LOGO}OTAKU VAULT</span><div class="hr"><span class="coins pts" title="Points de boutique"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="#7C8CFF"/><path d="M5 8l2 2 4-4" stroke="#fff" stroke-width="1.6" fill="none"/></svg><b>${S.pts}</b><span class="sm">pts</span></span><span class="coins" title="Éclats">${SHARD}<b>${S.coins}</b><span class="sm">éclats</span></span><button class="ib" data-a="theme" aria-label="Changer de thème">${icon(isDark()?'sun':'moon',18)}</button></div>`;
+}
+function renderNav(){
+  $('#nav').innerHTML=`<span class="brand">${LOGO}OTAKU VAULT</span>`+TABS.map(t=>`<button data-a="tab" data-t="${t[0]}"${UI.tab===t[0]?' aria-current="page"':''}>${icon(t[2])}<span>${t[1]}</span></button>`).join('');
+}
+function render(){
+  renderHead();renderNav();
+  const v={home:vHome,packs:vPacks,album:vAlbum,trade:vTrade,shop:vShop,me:vMe}[UI.tab];
+  $('#main').innerHTML=v();
+}
+
+function vHome(){
+  const own=ownedN(),tot=CARDS.length,C=2*Math.PI*52;
+  const ring=`<svg class="ring" viewBox="0 0 120 120" role="img" aria-label="${own} cartes sur ${tot}"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--surface2)" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(C*own/tot).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 60 60)"/><text x="60" y="62" text-anchor="middle" class="rn">${own}</text><text x="60" y="80" text-anchor="middle" class="rs">sur ${tot}</text></svg>`;
+  const bars=SERIES.map(s=>{const p=pageProg(PAGEBY['s:'+s.id]);return `<button class="bar" data-a="gopage" data-k="s:${s.id}"><span class="bl"><b>${esc(s.name)}</b><span>${p.own}/${p.total}</span></span><span class="bt"><i style="width:${(p.pct*100).toFixed(0)}%;background:hsl(${s.h} 70% 50%)"></i></span></button>`}).join('');
+  const claimed=S.lastDaily===today(),ns=nextStreak();
+  const daily=claimed
+    ?`<p class="mut">Récompense du jour récupérée. Série en cours : ${S.streak} jour${S.streak>1?'s':''}.</p><p class="mut sm">Reviens demain pour ${dailyVal(S.streak+1)} éclats.</p><button class="btn" disabled>Déjà récupérée</button>`
+    :`<p class="mut">Série en cours : ${S.lastDaily===dstr(new Date(Date.now()-864e5))?S.streak:0} jour${S.streak>1?'s':''}. Plus tu reviens, plus la récompense monte, jusqu'au 7e jour.</p><button class="btn pri" data-a="daily">Récupérer ${dailyVal(ns)} éclats</button>`;
+  const owned=new Set(CARDS.filter(owns).map(c=>c.id));
+  const missing=CARDS.filter(c=>!owned.has(c.id));
+  const want=[...S.wish.map(id=>BY[id]).filter(c=>c&&!owned.has(c.id)),...missing.filter(c=>c.s===EVENT.id&&!S.wish.includes(c.id)),...missing.filter(c=>c.s!==EVENT.id&&!S.wish.includes(c.id))].slice(0,6);
+  const near=PAGES.map(p=>({p,...pageProg(p)})).filter(x=>!x.done&&x.own>0).sort((a,b)=>b.pct-a.pct).slice(0,3);
+  const nearH=near.length?near.map(x=>`<button class="bar" data-a="gopage" data-k="${x.p.key}"><span class="bl"><b>${esc(x.p.name)}</b><span>il manque ${x.total-x.own}</span></span><span class="bt"><i style="width:${(x.pct*100).toFixed(0)}%;background:var(--accent)"></i></span></button>`).join(''):`<p class="mut">Ouvre des boosters pour commencer à remplir tes pages.</p>`;
+  return `<div class="stack">
+  <div><h1>Ta collection</h1><p class="mut">Chaque carte remplit une série, une catégorie et un élément en même temps.</p></div>
+  ${S.starter&&!S.starterSeen?`<div class="panel note"><p style="margin:0">Deux boosters de départ ont déjà été ouverts pour toi. Tu peux voir ces cartes dans l'album.</p><button class="btn sm" data-a="starterok">Compris</button></div>`:''}
+  <div class="two">
+    <section class="panel"><div class="prog">${ring}<div>${bars}</div></div></section>
+    <section class="panel"><span class="kicker">Récompense quotidienne</span><h2>Reviens chaque jour</h2>${daily}</section>
+  </div>
+  <section class="event" style="background:linear-gradient(120deg,hsl(${EVENT.h} 60% 24%),hsl(${(EVENT.h+40)%360} 65% 38%))"><div><span class="kicker">Collection à l'honneur</span><p><b>${esc(EVENT.name)}</b></p><p class="sm">Les cartes de cette collection sont deux fois plus fréquentes dans les boosters Vault et Prestige jusqu'au ${EVEND}.</p></div><button class="btn" data-a="tab" data-t="packs">Voir les boosters</button></section>
+  <section class="panel"><h2>Pages presque complètes</h2>${nearH}</section>
+  ${want.length?`<section><h2>À chasser</h2><div class="hrow">${want.map(slot).join('')}</div></section>`:''}
+  ${S.hist.length?`<section><h2>Derniers tirages</h2><div class="hrow">${S.hist.slice(0,8).map(id=>slot(BY[id])).join('')}</div></section>`:''}
+  </div>`;
+}
+
+function oddsText(P){return P.w.map((w,i)=>w?`${RAR[i].name} ${String(w).replace('.',',')} %`:'').filter(Boolean).join(' · ')}
+function vPacks(){
+  const pity=S.pity>=PITY?'Le prochain booster contient forcément une carte Légendaire ou Alternatif.':`Une carte Légendaire ou Alternatif est garantie au plus tard dans ${PITY+1-S.pity} boosters.`;
+  const ser=SER[UI.packSeries];
+  const panel=(k,art,extra)=>{const P=PACKS[k];return `<article class="panel pk"><div class="pkart">${art}</div><div class="pkbody"><h2>${P.name}</h2><p class="mut">${P.n} cartes · ${P.desc}</p><p class="odds">Par carte : ${oddsText(P)}</p><p class="odds">Dernière carte : Rare minimum. 8 % de chance d'obtenir une version holo.</p>${extra||''}<div class="acts"><button class="btn pri" data-a="buy" data-pack="${k}"${S.coins<P.cost?' disabled':''}>Ouvrir pour ${P.cost} éclats</button></div></div></article>`};
+  const chips=`<div class="chips" style="margin-top:10px">${SERIES.map(s=>`<button class="chip" data-a="pser" data-s="${s.id}" aria-pressed="${UI.packSeries===s.id}">${esc(s.name)}</button>`).join('')}</div>`;
+  return `<div class="stack"><div><h1>Boosters</h1><p class="mut">${pity}</p></div>
+  ${panel('std',packSVG(235,270,'VAULT'))}
+  ${panel('ser',packSVG(ser.h,(ser.h+40)%360,'SÉRIE'),chips)}
+  ${panel('pre',packSVG(42,12,'PRESTIGE'))}
+  <p class="mut sm">Les cartes de ${esc(EVENT.name)} sont plus fréquentes jusqu'au ${EVEND} dans les boosters Vault et Prestige.</p></div>`;
+}
+
+function albumGrid(){
+  const p=PAGEBY[UI.page],q=norm(UI.q.trim());
+  const list=p.cards.filter(c=>{
+    if(UI.miss&&owns(c))return false;
+    if(UI.fr>=0&&c.r!==UI.fr)return false;
+    if(q&&!norm(`${c.name} ${SER[c.s].name} ${c.t} ${c.e}`).includes(q))return false;
+    return true;
+  });
+  return list.length?`<div class="grid">${list.map(slot).join('')}</div>`:`<p class="empty">Aucune carte ne correspond à ces filtres.</p>`;
+}
+function vAlbum(){
+  const p=PAGEBY[UI.page],pr=pageProg(p),claimed=S.claimed[p.key];
+  const gt=GROUPS.map(g=>`<button class="chip" data-a="agroup" data-k="${g.k}" aria-pressed="${UI.group===g.k}">${g.label}</button>`).join('');
+  const pg=PAGES.filter(x=>x.g===UI.group).map(x=>{const q=pageProg(x);return `<button class="pg${x.key===UI.page?' on':''}" data-a="gopage" data-k="${x.key}" aria-pressed="${x.key===UI.page}"><b>${esc(x.name)}</b><span>${q.own}/${q.total}</span></button>`}).join('');
+  const reward=pr.done&&!claimed?`<button class="btn pri" data-a="claim">Récupérer ${p.reward} éclats</button>`:claimed?`<span class="pill ok">Page validée</span>`:`<span class="pill">Récompense : ${p.reward} éclats</span>`;
+  return `<div class="stack"><div><h1>Album</h1><p class="mut">Une même carte apparaît dans trois pages : sa série, sa catégorie et son élément.</p></div>
+  <div class="chips">${gt}</div><div class="pgs">${pg}</div>
+  <section class="panel"><div class="pghead"><div><span class="kicker">${esc(p.sub)}</span><h2 style="margin:0">${esc(p.name)} · ${pr.own}/${pr.total}</h2></div>${reward}</div>
+  <span class="bt" style="margin-bottom:16px"><i style="width:${(pr.pct*100).toFixed(0)}%;background:var(--accent)"></i></span>
+  <div class="filters"><input type="search" id="q" placeholder="Nom, série, catégorie, élément" value="${esc(UI.q)}" aria-label="Rechercher une carte"><select id="fr" aria-label="Filtrer par rareté"><option value="-1">Toutes les raretés</option>${RAR.map((r,i)=>`<option value="${i}"${UI.fr===i?' selected':''}>${r.name}</option>`).join('')}</select><label><input type="checkbox" id="miss"${UI.miss?' checked':''}>Manquantes seulement</label></div>
+  <div id="agrid">${albumGrid()}</div></section></div>`;
+}
+
+function vShop(){
+  const items=CARDS.filter(c=>c.shop).sort((a,b)=>a.r-b.r||a.n-b.n);
+  const dups=CARDS.reduce((a,c)=>a+(S.col[c.id]&&S.col[c.id].n>1?S.col[c.id].n-1:0),0);
+  const got=items.filter(owns).length;
+  return `<div class="stack"><div><h1>Boutique</h1><p class="mut">Ces ${items.length} cartes n'existent pas dans les boosters. Recycle tes doublons pour gagner des points, puis échange-les ici. Tu en as ${got}/${items.length}.</p></div>
+  <div class="panel"><div class="acts" style="margin:0;align-items:center"><span><b>${S.pts}</b> points</span>${dups?`<button class="btn pri sm" data-a="sellrank" data-r="-1">Recycler tous mes doublons (${dups})</button>`:'<span class="mut">Aucun doublon à recycler pour le moment.</span>'}</div></div>
+  <div class="grid">${items.map(c=>{const ok=owns(c),pr=SHOPP[c.r];return `<div class="dupe">${slot(c)}${ok?'<span class="mut" style="text-align:center">Dans ta collection</span>':`<button class="btn sm${S.pts>=pr?' pri':''}" data-a="shopbuy" data-id="${c.id}">Acheter · ${pr} pts</button>`}</div>`}).join('')}</div></div>`;
+}
+function vTrade(){
+  if(!UI.offers)UI.offers=genOffers();
+  UI.offers=UI.offers.filter(validOffer);
+  const tabs=[['salon',"Salon d'échange"],['dup','Doublons'],['wish','Wishlist']].map(t=>`<button class="chip" data-a="ttab" data-t="${t[0]}" aria-pressed="${UI.tt===t[0]}">${t[1]}</button>`).join('');
+  let body='';
+  if(UI.tt==='salon'){
+    const offs=UI.offers.map(o=>{
+      return `<article class="panel offer"><div class="who"><div class="av">${o.npc.n[0]}</div><div><b>${o.npc.n}</b><span>${o.npc.c}</span><p>${esc(o.npc.m)}</p></div></div><div class="swap"><div class="col"><span class="kicker">Tu reçois</span>${slot(BY[o.give])}</div><span class="arrow">${icon('swap')}</span><div><span class="kicker">Tu donnes</span><div class="col multi">${o.ask.map(id=>`<div>${slot(BY[id])}</div>`).join('')}</div></div></div><div class="acts" style="margin-top:0"><button class="btn pri" data-a="accept" data-id="${o.id}">Accepter l'échange</button></div></article>`;
+    }).join('');
+    const hasDup=CARDS.some(c=>S.col[c.id]&&S.col[c.id].n>1);
+    body=`<p class="mut">Des collectionneurs simulés proposent des échanges équitables : même rareté, ou deux doublons d'une rareté inférieure contre une carte supérieure.</p>${offs||`<p class="empty">${hasDup?'Aucune offre pour le moment. Actualise le salon.':'Tu n\'as pas encore de doublons à échanger. Ouvre des boosters.'}</p>`}<div class="acts"><button class="btn" data-a="refresh">Actualiser le salon</button></div>`;
+  }else if(UI.tt==='dup'){
+    const dups=CARDS.filter(c=>S.col[c.id]&&S.col[c.id].n>1);
+    const bulk=[0,1,2,3,4,5].map(r=>{const n=dups.filter(c=>c.r===r).reduce((a,c)=>a+S.col[c.id].n-1,0);return n?`<button class="btn sm" data-a="sellrank" data-r="${r}">Recycler les doublons ${RAR[r].name} (${n})</button>`:''}).join('');
+    body=dups.length?`<p class="mut">Chaque carte est gardée en un exemplaire. Les doublons recyclés rapportent des éclats et des points à dépenser dans la Boutique. Les holos rapportent le double.</p><div class="acts" style="margin:0 0 16px">${bulk}</div><div class="grid">${dups.map(c=>{const e=S.col[c.id];return `<div class="dupe">${slot(c)}<button class="btn sm" data-a="sell" data-id="${c.id}">Recycler 1 · +${pv(c,e.n-e.f===0)} pts</button></div>`}).join('')}</div>`:`<p class="empty">Aucun doublon pour le moment.</p>`;
+  }else{
+    const w=S.wish.map(id=>BY[id]).filter(Boolean);
+    body=w.length?`<p class="mut">Les collectionneurs du salon proposent en priorité les cartes de ta wishlist.</p><div class="grid">${w.map(c=>`<div class="dupe">${slot(c)}<button class="btn sm" data-a="wish" data-id="${c.id}">Retirer</button></div>`).join('')}</div>`:`<p class="empty">Ta wishlist est vide. Ouvre une carte dans l'album pour l'ajouter.</p>`;
+  }
+  return `<div class="stack"><div><h1>Échanges</h1></div><div class="chips">${tabs}</div>${body}</div>`;
+}
+
+function vMe(){
+  const L=level(),own=ownedN(),copies=Object.values(S.col).reduce((a,e)=>a+e.n,0),holo=Object.values(S.col).filter(e=>e.f>0).length,ur=CARDS.filter(c=>c.r>=4&&owns(c)).length;
+  const pct=L.next?Math.min(100,(L.xp-L.t[0])/(L.next[0]-L.t[0])*100):100;
+  const stats=[[own+'/'+CARDS.length,'Cartes différentes'],[copies,'Exemplaires'],[holo,'Cartes holo'],[ur,'Légendaires et alt.'],[S.opened,'Boosters ouverts'],[S.trades,'Échanges']].map(s=>`<div class="stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
+  const ach=ACH.map(a=>{const on=!!S.ach[a.id];return `<div class="ach ${on?'on':'lock'}"><span class="dot">${icon(on?'check':'lock',16)}</span><div><b>${a.n}</b><span>${a.d} ${on?'':`Récompense : ${a.r} éclats.`}</span></div></div>`}).join('');
+  return `<div class="stack"><div><h1>Profil</h1></div>
+  <section class="panel"><span class="kicker">Niveau ${L.i+1}</span><h2>${L.t[1]}</h2><span class="bt" style="margin-bottom:8px"><i style="width:${pct.toFixed(0)}%;background:var(--accent)"></i></span><p class="mut sm">${L.xp} points${L.next?`, encore ${L.next[0]-L.xp} avant « ${L.next[1]} »`:', niveau maximum atteint'}.</p>
+  <label class="kicker" for="nm" style="margin-top:14px">Nom de collectionneur</label><input id="nm" class="field" maxlength="28" value="${esc(S.name)}"></section>
+  <section class="panel"><h2>Statistiques</h2><div class="stats">${stats}</div></section>
+  <section class="panel"><h2>Succès</h2>${ach}</section>
+  <section class="panel"><h2>Sauvegarde</h2><p class="mut">${canStore?'Ta collection est enregistrée dans ce navigateur.':'L\'enregistrement automatique n\'est pas disponible ici. Utilise le code de sauvegarde.'} Le code te permet de garder une copie ou de changer d'appareil.</p>
+  <textarea id="codebox" class="field" aria-label="Code de sauvegarde" placeholder="Le code de sauvegarde apparaît ici. Colle un code pour le charger.">${esc(UI.code)}</textarea>
+  <div class="acts"><button class="btn" data-a="export">Générer mon code</button><button class="btn" data-a="copy">Copier</button><button class="btn" data-a="import">Charger ce code</button></div></section>
+  <section class="panel"><h2>Son</h2><div class="chips"><button class="chip" data-a="snd" aria-pressed="${S.sound}">Sons d'ouverture des boosters</button></div></section>
+  <section class="panel"><h2>Mentions</h2><p class="mut sm" style="margin:0">Otaku Vault est un projet de fan non officiel. Les noms d'œuvres, de studios et de consoles appartiennent à leurs ayants droit. Les illustrations sont générées par le code et ne reprennent aucune image officielle. Les descriptions sont rédigées librement.</p></section>
+  <section class="panel"><h2>Remise à zéro</h2>${UI.confirm?`<p>Toute ta collection sera effacée. Cette action est définitive.</p><div class="acts" style="margin-top:0"><button class="btn pri" data-a="reset">Tout effacer</button><button class="btn" data-a="noreset">Annuler</button></div>`:`<p class="mut">Repars d'une collection vide avec deux boosters de départ.</p><button class="btn" data-a="askreset">Recommencer</button>`}</section></div>`;
+}
+
+/* ---------- Fenêtres : fiche carte et ouverture de booster ---------- */
+function ovCard(c){
+  const e=S.col[c.id]||{n:0,f:0},own=e.n>0,wished=S.wish.includes(c.id),pages=PAGES.filter(p=>p.cards.includes(c));
+  const sell=e.n>1?`<button class="btn" data-a="sell" data-id="${c.id}">Recycler un doublon · +${pv(c,e.n-e.f===0)} pts</button>`:'';
+  return `<div class="ov" data-a="ovbg"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(c.name)}"><div>${cardHTML(c,{big:true})}</div><div class="info"><button class="ib close" data-a="closeov" data-focus aria-label="Fermer">×</button>
+  <span class="kicker">N°${pad(c.n)} · ${esc(SER[c.s].name)} ${pad(c.sn,2)}/${PAGEBY['s:'+c.s].cards.length}</span><h2 class="ttl">${esc(c.name)}</h2>
+  <div class="tags"><span class="tag r${c.r}">${RAR[c.r].name}</span><span class="tag">${c.t}</span><span class="tag el" style="--ec:${EL[c.e]}">${c.e}</span>${c.g?`<span class="tag">${esc(c.g)}</span>`:''}</div>
+  ${c.base?`<p class="mut" style="margin:0">Version alternative de ${esc(BY[c.base].name)}.</p>`:''}<p class="flav">${own?esc(c.txt):'Description verrouillée. Obtiens cette carte pour la lire.'}</p>
+  <p class="mut" style="margin:0">${own?`Tu en possèdes ${e.n}${e.f?`, dont ${e.f} holo`:''}.`:'Tu ne possèdes pas encore cette carte.'}</p>
+  <div><span class="kicker">Compte dans ${pages.length} pages d'album</span><div class="chips">${pages.map(p=>`<button class="chip" data-a="gopage" data-k="${p.key}">${esc(p.name)}</button>`).join('')}</div></div>
+  <div class="acts" style="margin-top:0"><button class="btn${wished?'':' pri'}" data-a="wish" data-id="${c.id}">${wished?'Retirer de la wishlist':'Ajouter à la wishlist'}</button>${sell}</div>
+  ${own?`<div class="acts" style="margin-top:0"><label class="btn sm">${IMG[c.id]?'Changer mon image':'Ajouter ma propre image'}<input type="file" accept="image/*" data-img="${c.id}" hidden></label>${IMG[c.id]?`<button class="btn sm" data-a="imgdel" data-id="${c.id}">Retirer mon image</button>`:''}</div><p class="mut" style="margin:0;font-size:12px">Ton image reste sur cet appareil. Utilise tes propres dessins ou des visuels dont tu as les droits.</p>`:''}</div></div></div>`;
+}
+function ovReveal(){
+  const R=UI.rev,sb=`<button class="ib sndbtn" data-a="snd" aria-label="Activer ou couper le son">${icon(S.sound?'vol':'mute',18)}</button>`;
+  if(R.stage==='pack')return `<div class="ov">${sb}<div class="revbox"><div class="packwrap" id="pkw" data-a="revopen"${R.aura?` style="--ac:${R.aura}88"`:''}><div class="rays"></div><div class="pk2" id="pk"><div class="half top">${R.pack}</div><div class="half bot">${R.pack}</div></div></div><p class="revhint">Touche le booster pour l'ouvrir</p><button class="btn pri" data-a="revopen" data-focus>Ouvrir le booster</button></div></div>`;
+  return `<div class="ov">${sb}<div class="revbox"><div class="rcards">${R.pulls.map((p,i)=>`<div class="rc g${p.c.r>=3?p.c.r:0}${p.c.r>=4?' slow':''}" data-a="flip" data-i="${i}" data-r="${p.c.r}" style="--i:${i}"><div class="flip"><div class="face back">${BACK}</div><div class="face fr">${cardHTML(p.c,{show:true,foil:p.foil,tag:p.isNew?'Nouveau':'Doublon'})}</div></div></div>`).join('')}</div><ul class="recap">${R.pulls.map((p,i)=>`<li class="rp" data-i="${i}"><span class="tag r${p.c.r}">${RAR[p.c.r].code}</span><span class="rn">${esc(p.c.name)}</span>${p.isNew?'<em>Nouveau</em>':'<small>Doublon</small>'}${p.foil?'<small>Holo</small>':''}</li>`).join('')}</ul><p class="revhint" id="rh">Touche les cartes pour les retourner</p><div class="acts c"><button class="btn" data-a="flipall" data-focus>Tout révéler</button><button class="btn pri" data-a="revdone">Terminer</button></div></div></div>`;
+}
+function renderOv(){
+  const el=$('#ov');
+  if(!UI.ov){el.innerHTML='';document.body.style.overflow='';return}
+  document.body.style.overflow='hidden';
+  el.innerHTML=UI.ov.k==='card'?ovCard(BY[UI.ov.id]):ovReveal();
+  const f=el.querySelector('[data-focus]');if(f&&f.focus)f.focus();
+}
+function revHint(){
+  const R=UI.rev,all=document.querySelectorAll?document.querySelectorAll('.rc'):[],on=[...all].filter(x=>x.classList.contains('on')).length;
+  const h=$('#rh');if(!h)return;
+  if(on>=R.pulls.length){
+    const n=R.pulls.filter(p=>p.isNew).length,best=Math.max(...R.pulls.map(p=>p.c.r));
+    h.textContent=`${n} nouvelle${n>1?'s':''} carte${n>1?'s':''}. Meilleure rareté : ${RAR[best].name}.`;
+  }else h.textContent=`${on} carte${on>1?'s':''} retournée${on>1?'s':''} sur ${R.pulls.length}`;
+}
+
+/* ---------- Actions ---------- */
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),3200)}
+function applyTheme(){const r=document.documentElement;if(S.theme)r.setAttribute('data-theme',S.theme);else r.removeAttribute('data-theme')}
+function isDark(){return S.theme?S.theme==='dark':(typeof matchMedia==='function'&&matchMedia('(prefers-color-scheme: dark)').matches)}
+function encode(){const b=new TextEncoder().encode(JSON.stringify(S));let s='';b.forEach(x=>s+=String.fromCharCode(x));return btoa(s)}
+function decode(txt){
+  const s=atob(txt.trim()),b=Uint8Array.from(s,ch=>ch.charCodeAt(0)),o=JSON.parse(new TextDecoder().decode(b));
+  if(!o||o.v!==3||typeof o.col!=='object'||!o.col)throw new Error('format');
+  Object.keys(o.col).forEach(k=>{if(!BY[k])delete o.col[k]});
+  o.hist=(o.hist||[]).filter(id=>BY[id]);o.wish=(o.wish||[]).filter(id=>BY[id]);
+  return Object.assign(fresh(),o);
+}
+function startReveal(pulls,type,sid){
+  const ser=SER[sid]||SER[UI.packSeries];
+  const pack=type==='ser'?packSVG(ser.h,(ser.h+40)%360,'SÉRIE'):type==='pre'?packSVG(42,12,'PRESTIGE'):packSVG(235,270,'VAULT');
+  const best=Math.max(...pulls.map(p=>p.c.r));
+  UI.rev={pulls,pack,stage:'pack',busy:false,aura:{5:'#5ef0ff',4:'#fbbf24',3:'#f472d0',2:'#2dd4bf'}[best]||''};
+  UI.ov={k:'rev'};renderOv();
+}
+function resetAll(){
+  S=fresh();S.starter=true;drawPack('std');drawPack('std');S.opened=0;S.pity=0;
+  UI.offers=null;UI.confirm=false;UI.code='';applyTheme();save();
+}
+function closeOv(){UI.ov=null;UI.rev=null;renderOv();render()}
+
+/* Effets d'ouverture : lumière, étincelles, bannière et sons synthétisés */
+const FX={3:{c:'#f472d0',n:16,t:'ULTRA RARE'},4:{c:'#fbbf24',n:28,t:'LÉGENDAIRE',flash:1,jolt:1},5:{c:'#5ef0ff',n:38,t:'ALTERNATIF',flash:1,jolt:1}};
+let AC=null;
+function sfx(kind,r){
+  if(!S.sound)return;
+  try{
+    const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
+    AC=AC||new Ctx();if(AC.state==='suspended')AC.resume();
+    const t=AC.currentTime;
+    const tone=(f,t0,d,type,g)=>{const o=AC.createOscillator(),v=AC.createGain();o.type=type;o.frequency.value=f;v.gain.setValueAtTime(.0001,t0);v.gain.exponentialRampToValueAtTime(g,t0+.02);v.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(v);v.connect(AC.destination);o.start(t0);o.stop(t0+d+.05)};
+    const noise=(t0,d,g,hp)=>{const n=Math.floor(AC.sampleRate*d),b=AC.createBuffer(1,n,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const src=AC.createBufferSource();src.buffer=b;const f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=hp;const v=AC.createGain();v.gain.value=g;src.connect(f);f.connect(v);v.connect(AC.destination);src.start(t0)};
+    if(kind==='tear'){noise(t,.5,.4,2200);tone(160,t,.35,'sawtooth',.05)}
+    else if(kind==='flip'){noise(t,.16,.2,1800)}
+    else{const seq=[[440],[523,659],[523,659,784],[523,659,784,988],[523,659,784,1047,1319],[659,784,988,1319,1568,1976]][r]||[440];seq.forEach((f,i)=>tone(f,t+i*.09,.5,r>=3?'triangle':'sine',.12))}
+  }catch(e){}
+}
+function flashFx(c){const d=document.createElement('div');d.className='flashfx';d.style.setProperty('--fc',c);document.body.appendChild(d);setTimeout(()=>d.remove(),900)}
+function banner(t,c){const d=document.createElement('div');d.className='banner';d.textContent=t;d.style.setProperty('--c',c);document.body.appendChild(d);setTimeout(()=>d.remove(),1800)}
+function burst(el,c,n){
+  if(!el.getBoundingClientRect)return;
+  const b=el.getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2;
+  for(let i=0;i<n;i++){
+    const d=document.createElement('div'),a=Math.random()*6.283,r=60+Math.random()*130;
+    d.className='sp';
+    d.style.cssText=`left:${cx}px;top:${cy}px;--c:${c};--dx:${(Math.cos(a)*r).toFixed(0)}px;--dy:${(Math.sin(a)*r).toFixed(0)}px;animation-delay:${(Math.random()*.15).toFixed(2)}s`;
+    document.body.appendChild(d);setTimeout(()=>d.remove(),1200);
+  }
+}
+function revFx(el,r){
+  setTimeout(()=>{
+    sfx('win',r);const fx=FX[r];if(!fx)return;
+    burst(el,fx.c,fx.n);banner(fx.t,fx.c);
+    if(fx.flash)flashFx(fx.c);
+    if(fx.jolt){const o=$('.ov');if(o){o.classList.add('jolt');setTimeout(()=>o.classList.remove('jolt'),600)}}
+  },r>=4?750:420);
+}
+
+const A={
+  tab(t){UI.tab=t.dataset.t;render();window.scrollTo(0,0)},
+  theme(){S.theme=isDark()?'light':'dark';applyTheme();save();render()},
+  daily(){if(S.lastDaily===today())return;const s=nextStreak(),v=dailyVal(s);S.streak=s;S.lastDaily=today();S.coins+=v;checkAch();save();toast(`+${v} éclats`);render()},
+  starterok(){S.starterSeen=true;save();render()},
+  card(t){UI.ov={k:'card',id:t.dataset.id};renderOv()},
+  closeov(){closeOv()},
+  ovbg(){closeOv()},
+  gopage(t){const p=PAGEBY[t.dataset.k];UI.group=p.g;UI.page=p.key;UI.q='';UI.fr=-1;UI.miss=false;UI.tab='album';UI.ov=null;renderOv();render();window.scrollTo(0,0)},
+  agroup(t){UI.group=t.dataset.k;UI.page=PAGES.find(p=>p.g===UI.group).key;render()},
+  claim(){const p=PAGEBY[UI.page];if(!pageProg(p).done||S.claimed[p.key])return;S.claimed[p.key]=1;S.coins+=p.reward;checkAch();save();toast(`Page validée : +${p.reward} éclats`);render()},
+  pser(t){UI.packSeries=t.dataset.s;render()},
+  buy(t){
+    const k=t.dataset.pack,P=PACKS[k];
+    if(S.coins<P.cost){toast('Pas assez d\'éclats.');return}
+    S.coins-=P.cost;const pulls=drawPack(k,UI.packSeries);S.opened++;UI.offers=null;
+    checkAch();save();renderHead();startReveal(pulls,k,UI.packSeries);
+  },
+  revopen(){
+    const R=UI.rev;if(!R||R.stage!=='pack'||R.busy)return;R.busy=true;
+    const pk=$('#pk'),w=$('#pkw');if(pk)pk.classList.add('shake');
+    setTimeout(()=>{sfx('tear');if(pk)pk.classList.add('go');if(w)w.classList.add('open');flashFx(R.aura||'#ffffff')},650);
+    setTimeout(()=>{if(UI.rev===R){R.stage='cards';renderOv()}},1450);
+  },
+  flip(t){
+    if(t.classList.contains('on')||!UI.rev)return;
+    t.classList.add('on');const rp=document.querySelector('.rp[data-i="'+t.dataset.i+'"]');if(rp)rp.classList.add('on');sfx('flip');revFx(t,+t.dataset.r);revHint();
+  },
+  flipall(){
+    const all=[...document.querySelectorAll('.rc')].filter(x=>!x.classList.contains('on')).sort((a,b)=>+a.dataset.r-+b.dataset.r);
+    let d=0;all.forEach(x=>{setTimeout(()=>A.flip(x),d);d+=+x.dataset.r>=4?1400:420});
+  },
+  snd(t){S.sound=!S.sound;save();if(UI.ov)t.innerHTML=icon(S.sound?'vol':'mute',18);else render();if(S.sound)sfx('flip')},
+  revdone(){closeOv()},
+  wish(t){const id=t.dataset.id,i=S.wish.indexOf(id);if(i>=0)S.wish.splice(i,1);else S.wish.push(id);UI.offers=null;save();render();if(UI.ov&&UI.ov.k==='card')renderOv()},
+  sell(t){const b=S.pts,v=sellOne(t.dataset.id);if(!v)return;UI.offers=null;save();toast(`+${v} éclats · +${S.pts-b} points`);render();if(UI.ov&&UI.ov.k==='card')renderOv()},
+  sellrank(t){const r=+t.dataset.r;const b=S.pts;let tot=0;CARDS.filter(c=>r<0||c.r===r).forEach(c=>{while(S.col[c.id]&&S.col[c.id].n>1)tot+=sellOne(c.id)});if(tot){UI.offers=null;save();toast(`+${tot} éclats · +${S.pts-b} points`);render()}},
+  shopbuy(t){const c=BY[t.dataset.id];if(!c||!c.shop||owns(c))return;const pr=SHOPP[c.r];if(S.pts<pr){toast('Pas assez de points.');return}S.pts-=pr;S.col[c.id]={n:1,f:0};checkAch();save();toast(`${c.name} ajoutée à ta collection`);render()},
+  imgdel(t){imgDel(t.dataset.id);toast('Image retirée');render();renderOv()},
+  ttab(t){UI.tt=t.dataset.t;render()},
+  refresh(){UI.offers=genOffers();render()},
+  accept(t){
+    const o=UI.offers.find(x=>x.id===t.dataset.id);if(!o)return;
+    if(!validOffer(o)){toast('Cette offre n\'est plus valable.');render();return}
+    o.ask.forEach(takeOne);
+    const e=S.col[o.give]||(S.col[o.give]={n:0,f:0});e.n++;
+    S.wish=S.wish.filter(x=>x!==o.give);S.trades++;
+    UI.offers=UI.offers.filter(x=>x!==o);
+    checkAch();save();toast(`Échange conclu avec ${o.npc.n}`);render();
+  },
+  export(){UI.code=encode();render();const b=$('#codebox');if(b&&b.select)b.select()},
+  copy(){
+    const b=$('#codebox');if(!b)return;if(!b.value){UI.code=encode();render()}
+    const txt=$('#codebox').value;
+    try{navigator.clipboard.writeText(txt).then(()=>toast('Code copié')).catch(()=>{$('#codebox').select();toast('Copie le code sélectionné')})}
+    catch(e){$('#codebox').select();toast('Copie le code sélectionné')}
+  },
+  import(){
+    const b=$('#codebox');
+    try{const o=decode(b.value);S=o;UI.offers=null;UI.code='';applyTheme();save();toast('Sauvegarde chargée');render()}
+    catch(e){toast('Ce code n\'est pas valide.')}
+  },
+  askreset(){UI.confirm=true;render()},
+  noreset(){UI.confirm=false;render()},
+  reset(){resetAll();toast('Nouvelle collection créée');render()}
+};
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.img&&t.files&&t.files[0])imgFile(t.dataset.img,t.files[0])});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-a]');if(!t)return;
+  const a=A[t.dataset.a];if(!a)return;
+  if(t.dataset.a==='ovbg'&&e.target!==t)return;
+  a(t,e);
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='q'){UI.q=t.value;$('#agrid').innerHTML=albumGrid()}
+  else if(t.id==='nm'){S.name=t.value.trim()||'Collectionneur';save()}
+  else if(t.id==='codebox'){UI.code=t.value}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='fr'){UI.fr=+t.value;$('#agrid').innerHTML=albumGrid()}
+  else if(t.id==='miss'){UI.miss=t.checked;$('#agrid').innerHTML=albumGrid()}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&UI.ov)closeOv()});
+
+/* ---------- Démarrage ---------- */
+if(firstRun){
+  drawPack('std');drawPack('std');S.opened=0;S.pity=0;S.starter=true;save();
+}
+applyTheme();
+render();
+imgLoad();
+</script>
+</body></html>
